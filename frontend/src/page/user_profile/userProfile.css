@@ -1,0 +1,7 @@
+.profile-photo{
+    border-radius: 50%;
+}
+
+.main{
+    flex-grow: 1;
+}

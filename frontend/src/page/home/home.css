@@ -1,0 +1,16 @@
+.background{
+    /* background-image: url('https://mdbcdn.b-cdn.net/img/new/slides/041.webp'); */
+    background: linear-gradient(130deg, blue, purple);
+    /* align-self: center; */
+    justify-self: center;
+    flex-grow: 1;
+}
+
+.back-color{
+    background-color: rgba(0, 0, 0, 0.6);
+}
+
+.content{
+    width:80%;
+}
+
