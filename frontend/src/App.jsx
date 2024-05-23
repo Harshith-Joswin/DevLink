@@ -37,7 +37,6 @@ function App() {
         <Route path="/projectAccepted" element={<UnderDevelopment/>}/>
         <Route path="/message" element={<UnderDevelopment/>}/> 
         {/* <Route path="/mes" element={<Messages/>}/> */}
-    
         <Route path="*" element={<NotFound/>}/>
       </Routes>
     </>
