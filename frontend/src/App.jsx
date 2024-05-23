@@ -19,12 +19,17 @@ import { Route, Routes } from "react-router-dom";
 import UnderDevelopment from "./page/underDevelopment/UnderDevelopment.jsx";
 import Feed from "./page/feed/Feed.jsx";
 import MyPosts from "./page/myPosts/MyPosts.jsx";
+import CreatePost from "./page/createPost/CreatePost.jsx";
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 
 function App() {
   // const [count, setCount] = useState(0)
 
   return (
     <>
+    <ToastContainer />
       <Routes>
         <Route path="/" element={<Home/>}/>
         <Route path="/login" element={<Login/>}/>
@@ -36,6 +41,7 @@ function App() {
         <Route path="/myposts" element={<MyPosts/>}/>
         <Route path="/projectAccepted" element={<UnderDevelopment/>}/>
         <Route path="/message" element={<UnderDevelopment/>}/> 
+        <Route path="/create-post" element={<CreatePost/>}/> 
         {/* <Route path="/mes" element={<Messages/>}/> */}
         <Route path="*" element={<NotFound/>}/>
       </Routes>

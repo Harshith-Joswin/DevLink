@@ -5,6 +5,8 @@ import axios from "axios";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Alert from "../components/Alert";
+import { toast } from 'react-toastify';
+
 
 function Register() {
   const navigate = useNavigate();
@@ -123,8 +125,21 @@ function Register() {
               cpass: false,
             }));
 
+
             const token = response.data;
             localStorage.setItem("devlinktoken", token.auth_token);
+            
+
+            toast.success("Registration Successful", {
+              position: "top-center",
+              autoClose: 5000,
+              hideProgressBar: false,
+              closeOnClick: true,
+              pauseOnHover: true,
+              draggable: true,
+              progress: undefined,
+              theme: "light",
+            });
             navigate("/feed");
           }
         })
@@ -133,7 +148,7 @@ function Register() {
           let obj = errorObject.response.data;
           // console.log(obj);
 
-          // console.log(JSON.stringify(obj, null, 2));
+          console.log(JSON.stringify(obj, null, 2));
           // console.log(formData);
           setformError((prevFormError) => ({
             ...prevFormError,
@@ -208,8 +223,6 @@ function Register() {
       }));
     }
   };
-
-  
 
   return (
     <>
@@ -342,11 +355,13 @@ function Register() {
                   value={dobData.year}
                   onChange={handleDateChange}
                 >
-                  {Array.from({ length: 104 }, (_, i) => 2024 - i).map((num) => (
-                    <option key={num} value={num}>
-                      {num}
-                    </option>
-                  ))}
+                  {Array.from({ length: 104 }, (_, i) => 2024 - i).map(
+                    (num) => (
+                      <option key={num} value={num}>
+                        {num}
+                      </option>
+                    )
+                  )}
                 </select>
               </div>
             </div>
