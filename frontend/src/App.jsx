@@ -22,7 +22,7 @@ import CreatePost from "./page/createPost/CreatePost.jsx";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import PrivateRoute from "./PrivateRoute";
-import ProctectLogin from "./ProtectLogin.jsx";
+import AutoLogin from "./AutoLogin.jsx";
 
 function App() {
   // const [count, setCount] = useState(0)
@@ -48,7 +48,7 @@ function App() {
       </Routes> */}
 
       <Routes>
-        <Route element={<ProctectLogin />}>
+        <Route element={<AutoLogin />}>
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
