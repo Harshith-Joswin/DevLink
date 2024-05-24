@@ -1,6 +1,6 @@
-import React from 'react'
+import React from "react";
 import reactLogo from "../../assets/react.svg";
-import { toast } from 'react-toastify';
+import { toast } from "react-toastify";
 
 function CreatePost() {
   return (
@@ -24,11 +24,35 @@ function CreatePost() {
         </div> */}
       </nav>
 
+      <div className="bx-grow container d-flex flex-column align-items-center justify-content-center">
+        <h1>Create Post</h1>
+        <div className="container">
+          <form className="form-control p-3 m-2" method="post">
+            <label htmlFor="title" className="form-label">
+              Enter Title:
+            </label>
+            <input
+              type="text"
+              name="title"
+              id="title"
+              className="rounded form-control"
+            />
+            <br />
 
-
+            <label htmlFor="description" className="form-label">
+                Enter Description:
+              </label>
+              <textarea
+                name="description"
+                id="description"
+                className="rounded form-control"
+                rows="3"
+              ></textarea>
+          </form>
+        </div>
+      </div>
     </>
   );
-  
 }
 
-export default CreatePost
+export default CreatePost;
