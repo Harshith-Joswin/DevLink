@@ -80,7 +80,6 @@ LikeSchema.pre('findOneAndDelete', async function (next) {
 // Middleware to update likesCount when a like is deleted
 LikeSchema.post('findOneAndDelete', async function (doc) {
     try {
-        console.log("hiiii");
         const docData = this._docData;
         const Post = mongoose.model('post');
         const post = await Post.findById(docData.post);

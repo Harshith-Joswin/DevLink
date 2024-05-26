@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from 'react-router-dom';
 import defaultAvatar from '../profile/profile.jpg';
-
+import "../posts/post.css";
 
 
 export default function Posts(props) {
@@ -16,9 +16,11 @@ export default function Posts(props) {
     const [amount, setAmount] = useState();
     const [commentedUsers, setCommentedUsers] = useState();
     const [isLiked, setIsLiked] = useState(post.isLiked);
+    const [currentUser, setCurrentUser] = useState(); //logged user
+
     async function fetchComment() {
         try {
-            const response = await fetch(`http://localhost:4000/api/post/` + post._id + '/comment/?page=1&limit=10', {
+            const response = await fetch(`http://localhost:4000/api/post/` + post._id + '/comment/?page=1&limit=100', {
                 method: "POST"
             });
 
@@ -28,6 +30,7 @@ export default function Posts(props) {
 
             const newComment = await response.json();
             setComments(newComment.comments);
+
             setShowComment(true);
         } catch (error) {
             console.error('Error fetching comment:', error);
@@ -47,7 +50,6 @@ export default function Posts(props) {
             const newComment = await response.json();
             setBids(newComment.bids);
             setShowBid(true);
-            console.log(newComment);
         } catch (error) {
             console.error('Error fetching comment:', error);
         }
@@ -65,7 +67,6 @@ export default function Posts(props) {
                     'content': comment
                 })
             })
-
         }
         catch (e) {
             console.log(e);
@@ -111,8 +112,6 @@ export default function Posts(props) {
             }
         })
 
-        console.log(await response.json());
-
     }
 
     const toggleComment = async () => {
@@ -150,6 +149,55 @@ export default function Posts(props) {
 
         return 'just now';
     }
+
+    const deleteComment = async (id) => {
+        try {
+            const response = await fetch(`http://localhost:4000/api/post/comment/` + id, {
+                method: "DELETE",
+                headers: {
+                    'Content-Type': 'application/json',
+                    'auth_token': localStorage.getItem('devlinktoken')
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error('Network response was not ok ' + response.statusText);
+            }
+
+            fetchComment();
+
+            //fetchComment();
+        } catch (error) {
+            console.error('Error deleting comment:', error);
+        }
+    }
+
+    async function fetchUser(){
+        try{
+            const response = await fetch(`http://localhost:4000/api/profile`, {
+                method: "POST",
+                headers: {
+                    'Content-Type': 'application/json',
+                    'auth_token': localStorage.getItem('devlinktoken')
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error('Network response was not ok ' + response.statusText);
+            }
+            const user =await  response.json();
+            setCurrentUser(user._id);
+            console.log(currentUser);
+
+        } 
+        catch(e){
+
+        }
+    }
+
+    useEffect(() => {
+        fetchUser();
+    })
 
     return (
         <>
@@ -226,7 +274,7 @@ export default function Posts(props) {
                             <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e8eaed"><path d="M720-120H280v-520l280-280 50 50q7 7 11.5 19t4.5 23v14l-44 174h258q32 0 56 24t24 56v80q0 7-2 15t-4 15L794-168q-9 20-30 34t-44 14Zm-360-80h360l120-280v-80H480l54-220-174 174v406Zm0-406v406-406Zm-80-34v80H160v360h120v80H80v-520h200Z" /></svg>
                         </button>
                         <button className='btn btn-secondary m-1' onClick={fetchComment}>
-                            {/* comment */}{post.commentsCount + ' '}
+                            {/* comment */}{(comments.length) ? (comments.length) : (post.commentsCount) + ' '}
                             <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e8eaed"><path d="M240-400h320v-80H240v80Zm0-120h480v-80H240v80Zm0-120h480v-80H240v80ZM80-80v-720q0-33 23.5-56.5T160-880h640q33 0 56.5 23.5T880-800v480q0 33-23.5 56.5T800-240H240L80-80Zm126-240h594v-480H160v525l46-45Zm-46 0v-480 480Z" /></svg>
                         </button>
                         <button className='btn btn-success m-1' onClick={fetchBid}>
@@ -245,26 +293,30 @@ export default function Posts(props) {
                     {/* <button className='btn btn-danger m-1'>Report</button> */}
                 </div>
             </div>
+
+
+
             {showComment && (
                 <div className="showComment1">
                     <div className="container1">
                         <div className="details1">
-
                             {/* commentSection */}
-                            <div
-                                className="comment-section1"
-                                style={{ borderBottom: "1px solid #00000029" }}
-                            >
+                            <div className="comment-section1" style={{ borderBottom: "1px solid #00000029" }}>
                                 {comments.map((comment, index) => {
                                     return (
-                                        <p className="comm" key={comment._id + 'comments' + index}>
-                                            <span
-                                                className="commenter1"
-                                                style={{ fontWeight: "bolder" }}
-                                            >
+                                        <p className="comm" key={comment._id + 'comments' + index} style={{display:'flex', justifyContent:'space-between'}}>
+                                            <div>
+                                            <img style={{width:'50px', height:'50px', marginRight:'20px'}} src={comment.user.profilePhotoURL ? 'http://localhost:4000/api/profile/photo/' + comment.user.profilePhotoURL : defaultAvatar} alt="" className="profile" onClick={(e) => { navigate("/profile/" + comment.user._id); }} />
+                                            <span className="commenter1" style={{ fontWeight: "bolder" }}>
                                                 {comment.user.username}{" "}
                                             </span>
                                             <span className="commentText1">{comment.content}</span>
+                                            </div>
+                                            
+                                            {
+                                            (comment.user._id==currentUser) &&
+                                            (<span style={{marginRight:'50px', color:'red'}} onClick={ ()=> {deleteComment(comment._id)}}>X</span>)
+                                        }
                                         </p>
                                     );
                                 })}
@@ -283,6 +335,7 @@ export default function Posts(props) {
                                     className="comment"
                                     onClick={() => {
                                         makeComment(comment);
+                                        setComment("");
                                         toggleComment();
                                     }}
                                 >
@@ -311,20 +364,17 @@ export default function Posts(props) {
                         <div className="details1">
 
                             {/* commentSection */}
-                            <div
-                                className="comment-section1"
-                                style={{ borderBottom: "1px solid #00000029" }}
-                            >
+                            <div className="comment-section1" style={{ borderBottom: "1px solid #00000029" }}>
                                 {bids.map((bid, index) => {
                                     return (
                                         <p className="comm" key={bid._id + 'comments' + index}>
-                                            <span
-                                                className="commenter1"
-                                                style={{ fontWeight: "bolder" }}
-                                            >
+                                            <div>
+                                                
+                                            <span className="commenter1" style={{ fontWeight: "bolder" }}>
                                                 {bid.user.username}{" "}
                                             </span>
                                             <span className="commentText1">₹{'' + bid.amount}</span>
+                                            </div>
                                         </p>
                                     );
                                 })}

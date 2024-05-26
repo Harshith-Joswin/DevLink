@@ -1,24 +1,26 @@
 import React, { useEffect, useState } from "react";
 import "./Feed.css";
-import "../posts/post.css";
 import Navbar from "../nav/Navbar";
 
 import Posts from "../posts/Posts";
+import { useNavigate } from "react-router-dom";
 
 export default function Feed() {
     const [posts, setPosts] = useState([]);
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
+    const navigate = useNavigate();
 
     useEffect(() => {
         async function fetchData() {
             try {
-                const response = await fetch("http://localhost:4000/api/post/?page=1&limit=10", {
+                const response = await fetch("http://localhost:4000/api/post?page=1&limit=10", {
                     method: "POST",
                     headers: {
-                        "auth_token": localStorage.getItem('devlinktoken'),
+                        "auth_token": localStorage.getItem('devlinktoken')
                     }
                 });
+
                 const json = await response.json();
                 const posts = json.posts;
 
@@ -41,6 +43,7 @@ export default function Feed() {
 
                 setLoading(false);
             } catch (error) {
+                localStorage.removeItem('devlinktoken');
                 console.error("Error fetching data:", error);
             }
         }
@@ -49,14 +52,22 @@ export default function Feed() {
     }, []); // Empty dependency array means this effect will only run once, after the initial render
 
     if (loading) {
-        return <div>Loading...</div>;
+        return 
+        (
+            <>
+            <Navbar />
+            <main id="main">
+                Loading..
+            </main>
+            </>
+        );
     }
 
     return (
         <>
             <Navbar />
             <main id="main">
-                <div className="create_post">
+                <div className="create_post" onClick={()=>{navigate("/create-post")}}>
                     <img src="{{user.profile_photo.url}}" alt="profile" className="profile" />
                     <div id="create_post">Post a new project...</div>
                 </div>

@@ -344,13 +344,16 @@ router.delete('/comment/:commentId', fetchUser, (req, res) => {
     Comment.findById(req.params.commentId)
         .then(comment => {
             if (req.user.id == comment.user.toString()) {
-                Comment.findByIdAndDelete(req.params.commentId)
+                Comment.findOneAndDelete({_id:req.params.commentId})
                     .then(comment => {
                         return res.json({ message: "comment deleted successfully" });
                     })
                     .catch(error => {
                         return res.json({ message: "comment could not be deleted" });
                     })
+            }
+            else{
+                return res.status(401).json({message: "user not authorized"})
             }
         })
         .catch(error => {
@@ -513,14 +516,15 @@ async function recommendedPosts(userId, page, limit) {
         const followingUsers = (await Follow.find({ follower: user._id })).map(follow => follow.following);
         let skip = (page - 1) * limit;
 
-        const likedPosts = await Like.find({user:userId});
+        const likedPosts = (await Like.find({user:userId})).map(like => like.post);
         const daysDiff = ((new Date()).getDate() - 5);
+        
         const totalCount = await Post.aggregate([
             {
                 $match: {
                     $and: [
                         { user: { $in: followingUsers } },
-                        { createdAt: { $gte: daysDiff } },
+                        // { createdAt: { $gte: daysDiff } },
                         { isHandovered: { $ne: true } }
                     ]
                 }
@@ -531,8 +535,6 @@ async function recommendedPosts(userId, page, limit) {
         ]);
         let followingPosts = [];
 
-
-
         if (totalCount.length > (page - 1) * limit) {
             followingPosts = await Post.aggregate([
                 // Match posts with at least one matching platform or technology
@@ -542,9 +544,9 @@ async function recommendedPosts(userId, page, limit) {
                             {
                                 user: { $in: followingUsers }
                             },
-                            {
-                                createdAt: { $gte: daysDiff }
-                            },
+                            // {
+                            //     createdAt: { $gte: daysDiff }
+                            // },
                             { isHandovered: { $ne: true } }
                         ]
                     }
@@ -570,7 +572,7 @@ async function recommendedPosts(userId, page, limit) {
                         documentsURL:1,
                         likesCount: 1,
                         commentsCount: 1,
-                        isLiked: { $in: ['$_id', likedPosts] }
+                        isLiked: { $in: ["$_id", likedPosts] }
                     }
                 },
                 {
@@ -619,7 +621,7 @@ async function recommendedPosts(userId, page, limit) {
                         documentsURL:1,
                         likesCount: 1,
                         commentsCount: 1,
-                        isLiked: { $in: ['$_id', likedPosts] },
+                        isLiked: { $in: ["$_id", likedPosts] },
                         totalScore: {
                             $add: [
                                 {
