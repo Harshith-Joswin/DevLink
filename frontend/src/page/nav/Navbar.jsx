@@ -2,6 +2,7 @@ import React from "react";
 import "./Navbar.css";
 import { useNavigate } from "react-router-dom";
 import defaultAvatar from "../../assets/react.svg";
+import { toast } from 'react-toastify';
 
 export default function Navbar() {
   const currentUrl = window.location.href;
@@ -9,6 +10,16 @@ export default function Navbar() {
   const navigate = useNavigate();
   const logout =() =>{
     localStorage.removeItem('devlinktoken');
+    toast.error('Logged out from Devlink', {
+        position: "top-center",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+        });
     navigate("/")
   }
 

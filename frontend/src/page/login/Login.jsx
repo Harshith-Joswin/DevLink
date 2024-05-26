@@ -4,6 +4,7 @@ import Alert from "../components/Alert";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { toast } from 'react-toastify';
 
 function Login() {
   const [dataError, setdataError] = useState(false);
@@ -28,15 +29,25 @@ function Login() {
 
   const handleSubmit = (e) =>{
     e.preventDefault();
-    console.log({
-      username:formData.username,
-      password:formData.password
-    })
+    // console.log({
+    //   username:formData.username,
+    //   password:formData.password
+    // })
     axios.post("http://localhost:4000/api/auth/login",{
       username:formData.username,
       password:formData.password
     }).then((response)=>{
       if (response.status === 200) {
+        toast.success('Login Successful', {
+          position: "top-center",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light",
+          });
       const token = response.data;
       localStorage.setItem('devlinktoken', token.auth_token);
       navigate("/feed");
@@ -69,6 +80,7 @@ function Login() {
           </a>
         </div>
       </nav>
+
 
       {/* Alerts */}
       {dataError && <Alert alert="Invalid user name or password."/>}
