@@ -1,6 +1,3 @@
-// import { useState } from 'react'
-// import reactLogo from './assets/react.svg'
-// import viteLogo from '/vite.svg'
 import "./App.css";
 import "../node_modules/bootstrap/dist/css/bootstrap.css";
 import "../node_modules/bootstrap/dist/js/bootstrap.bundle.min.js";
@@ -25,28 +22,9 @@ import PrivateRoute from "./PrivateRoute";
 import AutoLogin from "./AutoLogin.jsx";
 
 function App() {
-  // const [count, setCount] = useState(0)
-
   return (
     <>
       <ToastContainer />
-      {/* <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-
-        <Route path="/feed" element={<Feed />} />
-        <Route path="/profile" element={<UserProfile />} />
-        <Route path="/profile/:slug" element={<Profile />} />
-        <Route path="/profupdate" element={<ProfUpdate />} />
-        <Route path="/myposts" element={<MyPosts />} />
-        <Route path="/projectAccepted" element={<UnderDevelopment />} />
-        <Route path="/message" element={<UnderDevelopment />} />
-        <Route path="/create-post" element={<CreatePost />} />
-        <Route path="/mes" element={<Messages/>}/>
-        <Route path="*" element={<NotFound />} />
-      </Routes> */}
-
       <Routes>
         <Route element={<AutoLogin />}>
           <Route path="/" element={<Home />} />
