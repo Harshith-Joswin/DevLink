@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from 'react-router-dom';
-import defaultAvatar from '../../assets/react.svg';
+import defaultAvatar from '../profile/profile.jpg';
 
 
 
@@ -8,7 +8,6 @@ export default function Posts(props) {
     const post = props.post;
     const user = props.user;
     const navigate = useNavigate();
-
     const [showComment, setShowComment] = useState(false);
     const [showBid, setShowBid] = useState(false);
     const [comments, setComments] = useState([]);
@@ -16,9 +15,7 @@ export default function Posts(props) {
     const [comment, setComment] = useState();
     const [amount, setAmount] = useState();
     const [commentedUsers, setCommentedUsers] = useState();
-    const [isLiked, setIsLiked] = useState();
-
-
+    const [isLiked, setIsLiked] = useState(post.isLiked);
     async function fetchComment() {
         try {
             const response = await fetch(`http://localhost:4000/api/post/` + post._id + '/comment/?page=1&limit=10', {
@@ -62,7 +59,7 @@ export default function Posts(props) {
                 method: "POST",
                 headers: {
                     'Content-Type': 'application/json',
-                    'auth_token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiNjY0NWUyZDkwMmQyNzBjMTZmYTAyYTQ5In0sImlhdCI6MTcxNTg1NjEyMH0.noRU3O3NzxNgIljkobs6yRr92A76Ntu0tdI2cm-h5Cw'
+                    'auth_token': localStorage.getItem('devlinktoken')
                 },
                 body: JSON.stringify({
                     'content': comment
@@ -83,7 +80,7 @@ export default function Posts(props) {
                 method: "POST",
                 headers: {
                     'Content-Type': 'application/json',
-                    'auth_token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiNjY0NWUyZDkwMmQyNzBjMTZmYTAyYTQ5In0sImlhdCI6MTcxNTg1NjEyMH0.noRU3O3NzxNgIljkobs6yRr92A76Ntu0tdI2cm-h5Cw'
+                    'auth_token': localStorage.getItem('devlinktoken')
                 },
                 body: JSON.stringify({
                     'amount': amount
@@ -107,13 +104,14 @@ export default function Posts(props) {
             setIsLiked(true);
             post.likesCount++;
         }
-        fetch('http://localhost:4000/api/post/' + post._id + '/like', {
-            method: "GET",
+        const response = await fetch('http://localhost:4000/api/post/' + post._id + '/like', {
+            method: "POST",
             headers: {
-                'Content-Type': 'application/json',
-                'auth_token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiNjY0NWUyZDkwMmQyNzBjMTZmYTAyYTQ5In0sImlhdCI6MTcxNTg1NjEyMH0.noRU3O3NzxNgIljkobs6yRr92A76Ntu0tdI2cm-h5Cw'
+                'auth_token': localStorage.getItem('devlinktoken')
             }
         })
+
+        console.log(await response.json());
 
     }
 
@@ -157,7 +155,7 @@ export default function Posts(props) {
         <>
             <div className="post" id="post_">
                 <div className="post_meta">
-                    <img src={user.profilePhotoURL ? 'http://localhost:4000/api/profile/photo/' + user.profilePhotoURL : defaultAvatar} alt="" className="profile" onClick={(e) => { navigate("/prfole/" + user.id); }} />
+                    <img src={user.profilePhotoURL ? 'http://localhost:4000/api/profile/photo/' + user.profilePhotoURL : defaultAvatar} alt="" className="profile" onClick={(e) => { navigate("/profile/" + user.id); }} />
                     <div className="name">
                         <span><b>{user.firstName + " " + user.lastName}</b></span>
                         <span>{user.username}</span>
@@ -190,7 +188,10 @@ export default function Posts(props) {
                         <div className="carousel-inner">
                             {post.imagesURL.map((img, index) => (
                                 <div className="carousel-item active" key={post._id + 'image' + index}>
-                                    <img src={'http://localhost:4000/api/post/photo/' + img} className="d-block w-100" alt="post photo" />
+                                    <img src={'http://localhost:4000/api/post/photo/' + img}
+                                        className="d-block w-100"
+                                        alt="post photo"
+                                        style={{ width: '500px', height: '500px', objectFit: 'cover' }} />
                                 </div>
 
                             ))}
@@ -296,7 +297,7 @@ export default function Posts(props) {
                             toggleComment();
                         }}
                     >
-                        <span className="material-symbols-outlined1 material-symbols-outlined-comment1" style={{color:'red'}} onClick={toggleComment}>
+                        <span className="material-symbols-outlined1 material-symbols-outlined-comment1" style={{ color: 'red' }} onClick={toggleComment}>
                             X
                         </span>
                     </div>
@@ -313,7 +314,7 @@ export default function Posts(props) {
                             <div
                                 className="comment-section1"
                                 style={{ borderBottom: "1px solid #00000029" }}
-                            >   
+                            >
                                 {bids.map((bid, index) => {
                                     return (
                                         <p className="comm" key={bid._id + 'comments' + index}>
@@ -323,7 +324,7 @@ export default function Posts(props) {
                                             >
                                                 {bid.user.username}{" "}
                                             </span>
-                                            <span className="commentText1">₹{''+bid.amount}</span>
+                                            <span className="commentText1">₹{'' + bid.amount}</span>
                                         </p>
                                     );
                                 })}
@@ -355,7 +356,7 @@ export default function Posts(props) {
                             toggleBid();
                         }}
                     >
-                        <span className="material-symbols-outlined1 material-symbols-outlined-comment1" style={{color:'red'}} onClick={toggleBid}>
+                        <span className="material-symbols-outlined1 material-symbols-outlined-comment1" style={{ color: 'red' }} onClick={toggleBid}>
                             X
                         </span>
                     </div>

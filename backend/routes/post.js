@@ -468,17 +468,6 @@ router.post('/:postId/comment', async (req, res) => {
     }
 });
 
-router.get('/:postId/like', fetchUser, async (req, res) => {
-    const like = await Like.findOne({ user: req.user.id, post: req.params.postId });
-    if (like) {
-        return res.json({liked:true});
-    }
-    else{
-        return res.json({liked:false});
-
-    }
-});
-
 //likes
 router.post('/:postId/like', fetchUser, async (req, res) => {
     const like = await Like.findOne({ user: req.user.id, post: req.params.postId });
@@ -522,7 +511,9 @@ async function recommendedPosts(userId, page, limit) {
         const userPlatforms = user.interestedPlatforms.map(platform => platform.platform);
         const userTechnologies = user.interestedTechnologies.map(tech => tech.technology);
         const followingUsers = (await Follow.find({ follower: user._id })).map(follow => follow.following);
-        skip = (page - 1) * limit;
+        let skip = (page - 1) * limit;
+
+        const likedPosts = await Like.find({user:userId});
         const daysDiff = ((new Date()).getDate() - 5);
         const totalCount = await Post.aggregate([
             {
@@ -579,7 +570,7 @@ async function recommendedPosts(userId, page, limit) {
                         documentsURL:1,
                         likesCount: 1,
                         commentsCount: 1,
-
+                        isLiked: { $in: ['$_id', likedPosts] }
                     }
                 },
                 {
@@ -592,9 +583,10 @@ async function recommendedPosts(userId, page, limit) {
 
         let similarPosts = [];
         if (page * limit > totalCount.length) {
-            skip = (page - 1) * limit - totalCount;
+            skip = (page - 1) * limit - totalCount.length;
             limit -= followingPosts.length;
 
+            if(skip>=0)
             similarPosts = await Post.aggregate([
                 // Match posts with at least one matching platform or technology
                 {
@@ -627,6 +619,7 @@ async function recommendedPosts(userId, page, limit) {
                         documentsURL:1,
                         likesCount: 1,
                         commentsCount: 1,
+                        isLiked: { $in: ['$_id', likedPosts] },
                         totalScore: {
                             $add: [
                                 {

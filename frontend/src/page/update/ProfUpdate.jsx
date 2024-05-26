@@ -127,11 +127,13 @@ function ProfUpdate() {
   };
 
   const FileInput = () => {
-    const [file, setFile] = useState(null);
   
     const { getRootProps, getInputProps, isDragActive } = useDropzone({
       onDrop: (acceptedFiles) => {
-        setFile(acceptedFiles[0]);
+        setFormData((prevFormData) => ({
+          ...prevFormData,
+          profile: acceptedFiles[0],
+        }));
       },
     });
   
@@ -142,9 +144,9 @@ function ProfUpdate() {
           isDragActive ? <p>Drop the file here ...</p> : <p>Drag and drop a file here, or click to select a file</p>
         }
         {
-          file && (
+          formData.profile && (
             <p>
-              Selected file: {file.name} ({file.type})
+              Selected file: {formData.profile.name} ({formData.profile.type})
             </p>
           )
         }
@@ -231,32 +233,62 @@ function ProfUpdate() {
 
   const handleSubmit = async (e) => {
 
-    const response = await fetch('http://localhost:4000/api/profile/update',{
-      method:"POST",
-      headers: {
-        auth_token: `${token}`
+    e.preventDefault();
+
+
+    const data = new FormData();
+
+    // Append form fields to formData
+    if(formData.email)
+    data.append('email', formData.email);
+    if(formData.username)
+      data.append('username', formData.username);
+    if(formData.firstName)
+      data.append('firstName', formData.firstName);
+    if(formData.lastName)
+      data.append('lastName', formData.lastName);
+    if(formData.skills)
+      data.append('skills', formData.skills);
+    if(formData.occupation)
+      data.append('occupation', formData.occupation);
+    if(formData.bio)
+      data.append('bio', formData.bio);
+    if(formData.date)
+      data.append('date', formData.date);
+    if(formData.month)
+      data.append('month', formData.month);
+    if(formData.year)
+      data.append('year', formData.year);
+    if(formData.currentPassword)
+      data.append('currentPassword', formData.currentPassword);
+    if(formData.newPassword)
+      data.append('newPassword', formData.newPassword);
+
+
+    if (formData.profile) {
+      data.append('profile', formData.profile);
+    }
+
+    for (let [key, value] of data.entries()) {
+    }
+  
+      const response = await fetch('http://localhost:4000/api/profile/update', {
+        method: "POST",
+        headers: {
+          'auth_token': `${token}`
       },
-      body: JSON.stringify(formData)
-    })
+      body: data
+    });
 
-    console.log(formData);
-    console.log(await response.json());
+  if (response.ok) {
+    // Handle success (e.g., navigate to another page or show a success message)
+    console.log("Profile updated successfully!");
+    // navigate('/some-other-page'); // Uncomment and use the correct path to navigate
+  } else {
+    // Handle error
+    console.log("Failed to update profile");
+  }
 
-
-    // axios
-    //   .post("http://localhost:4000/api/profile/update", formData, {
-    //     headers: {
-    //       auth_token: `${token}`,
-    //     },
-    //   })
-    //   .then((response) => {
-    //     console.log(response);
-    //     navigate('/profile')
-    //   })
-    //   .catch((error) => {
-    //     console.log(error);
-    //   });
-    // navigate('/profile')
 
   };
 
@@ -289,7 +321,7 @@ function ProfUpdate() {
         <div className="bx-grow container d-flex flex-column align-items-center justify-content-center">
           <h1>Update Profile</h1>
           <div className="container">
-            <div className="form-control p-3 m-2" 
+          <form  method="POST" onSubmit={handleSubmit} className="form-control p-3 m-2" 
             >
               <label htmlFor="email" className="form-label">
                 Enter Email:
@@ -522,18 +554,16 @@ function ProfUpdate() {
 
               <div className="container d-flex flex-column justify-content-center align-items-center">
                 <input
-                  type="button"
+                  type="submit"
                   value="Update"
                   className="btn btn-primary"
-                  onClick={handleSubmit}
                   style={{ width: "100px" }}
                 />
                 {/* <p className="text-center">
                   Have an account! <a href="/login">Login Here!</a>
                 </p> */}
               </div>
-            </div>
-            {/* </div> */}
+              </form>
           </div>
         </div>
       </>

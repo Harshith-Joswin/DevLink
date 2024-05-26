@@ -76,6 +76,7 @@ router.post('/update', fetchUser, upload.single('profile'),
         if (!errors.isEmpty()) {
 
             //if any field is invalid but new profile photo is stored, then delete it  
+            if (req.file) {
             const filePath = path.join(STORAGE_URL, "profiles/" + req.file.filename); // Adjust the path as per your file storage location
             fs.access(filePath, fs.constants.F_OK, (err) => {
                 if (!err) {
@@ -85,6 +86,7 @@ router.post('/update', fetchUser, upload.single('profile'),
                     });
                 }
             });
+        }
             return res.status(400).json({
                 errors: errors.array().map(error => {
                     return { path: error.path, message: error.msg }
@@ -122,7 +124,6 @@ router.post('/update', fetchUser, upload.single('profile'),
                     return res.status(400).json({ path: "password", message: 'both newPassword and currentPasswords are required' });
                 }
             }
-            console.log(req.body);
             User.findByIdAndUpdate(req.user.id, { $set: newData })
                 .then(async updatedUser => {
                     try {
