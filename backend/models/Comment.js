@@ -42,7 +42,7 @@ CommentSchema.post('save', async function (doc) {
 });
 
 // Middleware to update commentsCount when a new comment is deleted
-CommentSchema.post('remove', async function (doc) {
+CommentSchema.post('findOneAndDelete', async function (doc) {
     try {
         if (doc.post) {
             const Post = mongoose.model('post');

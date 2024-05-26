@@ -69,7 +69,6 @@ function UserProfile() {
         newDate.substring(8, 10) + " December " + newDate.substring(0, 4);
     }
 
-    console.log(resultStr);
     return resultStr;
   };
 
@@ -111,7 +110,7 @@ function UserProfile() {
           if (res.data.profilePhotoURL != "") {
             setData((prevFormError) => ({
               ...prevFormError,
-              profilePhotoURL: res.data.profilePhotoURL,
+              profilePhotoURL: 'http://localhost:4000/api/profile/photo/'+res.data.profilePhotoURL,
             }));
           }
 
@@ -135,7 +134,6 @@ function UserProfile() {
               dateOfBirth: newDOB(res.data.dateOfBirth),
             }));
           }
-          console.log(data);
         }
       })
       .catch((error) => {
@@ -176,11 +174,12 @@ function UserProfile() {
           <div className="row my-5">
             <div className="col-6">
               <img
-                src={profileImage}
-                alt="Bootstrap"
+                src={data.profilePhotoURL?data.profilePhotoURL:profileImage}
+                alt="profile"
                 // width="40"
                 height="200"
                 className="profile-photo"
+                style={{ width: '200px', height: '200px', objectFit: 'cover' }}
               />
             </div>
             <div className="col">

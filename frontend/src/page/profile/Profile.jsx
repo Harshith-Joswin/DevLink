@@ -68,7 +68,7 @@ function Profile() {
           if (res.data.profilePhotoURL != "") {
             setData((prevFormError) => ({
               ...prevFormError,
-              profilePhotoURL: res.data.profilePhotoURL,
+              profilePhotoURL: 'http://localhost:4000/api/profile/photo/' + res.data.profilePhotoURL,
             }));
           }
 
@@ -85,8 +85,6 @@ function Profile() {
               bio: res.data.bio,
             }));
           }
-
-          console.log(data);
         }
       })
       .catch((error) => {
@@ -172,11 +170,12 @@ function Profile() {
         <div className="row my-5">
           <div className="col-6">
             <img
-              src={profileImage}
-              alt="Bootstrap"
-              // width="40"
+              src={data.profilePhotoURL ? data.profilePhotoURL : profileImage}
+              alt="profile"
+              width="200"
               height="200"
               className="profile-photo"
+              style={{ width: '200px', height: '200px', objectFit: 'cover' }}
             />
           </div>
           <div className="col">
