@@ -3,6 +3,7 @@ import reactLogo from "../../assets/react.svg";
 import { toast } from "react-toastify";
 import { useState } from "react";
 import axios from "axios";
+// import { Document, Page } from "react-pdf";
 
 function CreatePost() {
   const monthNames = [
@@ -20,57 +21,11 @@ function CreatePost() {
     "December",
   ];
 
-  const [formData, setFormData] = useState({
-    title: "",
-    description: "",
-    budget: 0,
-    biddingEndDate: "2024-01-01",
-    projectEndDate: "2024-01-01",
-    platforms: [],
-    technologies: [],
-  });
-
-  const [biddingEndDate, setbiddingEndDate] = useState({
-    date: "01",
-    month: "01",
-    year: "2024",
-  });
-
-  const [projectEndDate, setprojectEndDate] = useState({
-    date: "01",
-    month: "01",
-    year: "2024",
-  });
-
-  const handleBidDateChange = (e) => {
-    const { name, value } = e.target;
-    setbiddingEndDate((prevData) => ({ ...prevData, [name]: value }));
-    console.log(name,value)
-  };
-
-  const handleProjDateChange = (e) => {
-    const { name, value } = e.target;
-    setprojectEndDate((prevData) => ({ ...prevData, [name]: value }));
-  };
-
   const [uploadedFiles, setUploadedFiles] = useState([]);
   const [previewImages, setPreviewImages] = useState([]);
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    if (name.includes("[")) {
-      const [field, subField] = name.split("[");
-      setFormData((prevState) => ({
-        ...prevState,
-        [field]: { ...prevState[field], [subField]: value },
-      }));
-    } else {
-      setFormData((prevState) => ({ ...prevState, [name]: value }));
-    }
-  };
-
   const handleFileEvent = (e) => {
-    const chosenFiles = Array.prototype.slice.call(e.target.files[0]);
+    const chosenFiles = Array.prototype.slice.call(e.target.files);
     handleUploadFiles(chosenFiles);
   };
 
@@ -92,90 +47,29 @@ function CreatePost() {
     });
   };
 
+  const handleUpload = () => {
+    const formData = new FormData();
+    uploadedFiles.forEach((file) => {
+      formData.append("files", file);
+    });
+
+    // Use Axios to upload the files
+    // axios.post('/upload', formData)
+    //   .then((response) => {
+    //     console.log(response);
+    //   })
+    //   .catch((error) => {
+    //     console.error(error);
+    //   });
+  };
+
   const [files, setFiles] = useState([]);
-
-  // const handleUpload = () => {
-  //   const formData = new FormData();
-  //   uploadedFiles.forEach((file) => {
-  //     formData.append("files", file);
-  //   });
-  // };
-
-  // const [status, setStatus] = useState("initial");
+  const [status, setStatus] = useState("initial");
 
   const handleFileChange = (e) => {
-    // setFiles(e.target.files);
-    const chosenFiles = Array.prototype.slice.call(e.target.files[0]);
-    handlePDFFile(chosenFiles);
+    setFiles(e.target.files);
   };
 
-  const handlePDFFile = (files) => {
-    const uploaded = [...uploadedFiles];
-    files.some((file) => {
-      uploaded.push(file);
-    });
-    setFiles(uploaded);
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-
-    const formValue = new FormData();
-    
-    if(formData.title)
-        formValue.append('title', formData.title);
-    if(formData.description)
-        formValue.append('description', formData.description);
-    if(formData.biddingEndDate)
-        formValue.append('biddingEndDate', biddingEndDate.year + '-' + biddingEndDate.month + '-' + biddingEndDate.date);
-    if(formData.projectEndDate)
-        formValue.append('projectEndDate', projectEndDate.year + '-' + projectEndDate.month + '-' + projectEndDate.date);
-    if(formData.platforms)
-        formValue.append('platforms', formData.platforms);
-    if(formData.technologies)
-        formValue.append('technologies', formData.technologies);
-    if(uploadedFiles)
-        formValue.append('images', [uploadedFiles]);
-    if(files)
-        formValue.append('documents', [files]);
-    if(formData.budget)
-        formValue.append('budget', formData.budget)
-
-    console.log(formValue);
-    // console.log(files[0]);
-
-    // const form2val = {
-    //   title: formData.title,
-    //   description: formData.description,
-    //   platforms: [formData.platforms],
-    //   technologies: [formData.technologies],
-    //   budget: formData.budget,
-    //   biddingEndDate: biddingEndDate.year + "-" + biddingEndDate.month + "-" + biddingEndDate.date,
-    //   projectEndDate: projectEndDate.year + "-" + projectEndDate.month + "-" + projectEndDate.date,
-    //   images: [uploadedFiles][0],
-    //   documents: [files]
-    // };
-    // console.log(form2val)
-
-    const token = localStorage.getItem("devlinktoken");
-
-    axios
-      .post(
-        "http://localhost:4000/api/post/create",
-        formValue,
-        {
-          headers: {
-            auth_token: `${token}`,
-          },
-        }
-      )
-      .then((res) => {
-        console.log("success:", res);
-      })
-      .catch((e) => {
-        console.log("Failed:", e.response);
-      });
-  };
 
   return (
     <>
@@ -201,12 +95,7 @@ function CreatePost() {
       <div className="bx-grow container d-flex flex-column align-items-center justify-content-center">
         <h1>Create Post</h1>
         <div className="container">
-          <form
-            className="form-control p-3 m-2"
-            method="post"
-            encType="multipart/form-data"
-            onSubmit={handleSubmit}
-          >
+          <form className="form-control p-3 m-2" method="post">
             <label htmlFor="title" className="form-label">
               Enter Title:
             </label>
@@ -215,7 +104,6 @@ function CreatePost() {
               name="title"
               id="title"
               className="rounded form-control"
-              onChange={handleInputChange}
             />
             <br />
 
@@ -227,7 +115,6 @@ function CreatePost() {
               id="description"
               className="rounded form-control"
               rows="3"
-              onChange={handleInputChange}
             ></textarea>
             <br />
 
@@ -238,7 +125,6 @@ function CreatePost() {
               type="number"
               name="budget"
               id="budget"
-              onChange={handleInputChange}
               className="rounded form-control"
             />
             <br />
@@ -250,10 +136,9 @@ function CreatePost() {
               <div className="col-1">
                 {/* <label className="form-label">Date:</label> */}
                 <select
-                  name="date"
+                  name="date-bidEnd"
                   id="date"
                   className="rounded form-control text-center"
-                  onChange={handleBidDateChange}
                 >
                   {Array.from({ length: 31 }, (_, i) => i + 1).map((num) => (
                     <option key={num} value={num.toString().padStart(2, "0")}>
@@ -265,10 +150,9 @@ function CreatePost() {
 
               <div className="col-2">
                 <select
-                  name="month"
+                  name="month-bidEnd"
                   id="month"
                   className="rounded form-control text-center"
-                  onChange={handleBidDateChange}
                 >
                   {monthNames.map((month, index) => (
                     <option
@@ -283,10 +167,9 @@ function CreatePost() {
 
               <div className="col-1">
                 <select
-                  name="year"
+                  name="year-bidEnd"
                   id="year"
                   className="rounded form-control text-center"
-                  onChange={handleBidDateChange}
                 >
                   {Array.from({ length: 50 }, (_, i) => 2024 + i).map((num) => (
                     <option key={num} value={num}>
@@ -305,10 +188,9 @@ function CreatePost() {
               <div className="col-1">
                 {/* <label className="form-label">Date:</label> */}
                 <select
-                  name="date"
+                  name="date-projEnd"
                   id="date"
                   className="rounded form-control text-center"
-                  onChange={handleProjDateChange}
                 >
                   {Array.from({ length: 31 }, (_, i) => i + 1).map((num) => (
                     <option key={num} value={num.toString().padStart(2, "0")}>
@@ -320,10 +202,9 @@ function CreatePost() {
 
               <div className="col-2">
                 <select
-                  name="month"
+                  name="month-projEnd"
                   id="month"
                   className="rounded form-control text-center"
-                  onChange={handleProjDateChange}
                 >
                   {monthNames.map((month, index) => (
                     <option
@@ -338,10 +219,9 @@ function CreatePost() {
 
               <div className="col-1">
                 <select
-                  name="year"
+                  name="year-projEnd"
                   id="year"
                   className="rounded form-control text-center"
-                  onChange={handleProjDateChange}
                 >
                   {Array.from({ length: 50 }, (_, i) => 2024 + i).map((num) => (
                     <option key={num} value={num}>
@@ -363,7 +243,6 @@ function CreatePost() {
               id="platforms"
               className="rounded form-control"
               placeholder="Ex: Andriod, Web, Windows"
-              onChange={handleInputChange}
             />
             <br />
 
@@ -377,33 +256,17 @@ function CreatePost() {
               id="technologies"
               className="rounded form-control"
               placeholder="Ex: PHP, MERN, etc"
-              onChange={handleInputChange}
             />
             <br />
 
             <div>
               <label htmlFor="images" className="form-label">
                 Select the images to post:
-              </label>
-              <br />
-              <input
-                type="file"
-                name="images"
-                multiple
-                onChange={handleFileEvent}
-                accept="image/*"
-              />
-              <ul
-                style={{
-                  listStyleType: "none",
-                  display: "flex",
-                  flexDirection: "row",
-                  overflow: "auto",
-                  margin: "10px",
-                }}
-              >
+              </label><br />
+              <input type="file" multiple onChange={handleFileEvent} accept="image/*" />
+              <ul style={{listStyleType:'none', display:'flex', flexDirection:'row', overflow:'auto', margin:'10px'}}>
                 {previewImages.map((image, index) => (
-                  <li key={index} style={{ margin: "5px" }}>
+                  <li key={index} style={{margin:'5px'}}>
                     <img src={image} alt={image} style={{ height: "300px" }} />
                   </li>
                 ))}
@@ -411,17 +274,10 @@ function CreatePost() {
             </div>
             <br />
 
-            <label htmlFor="documents" className="form-label">
+            <label htmlFor="images" className="form-label">
               Select the pdf files to post:
-            </label>
-            <br />
-            <input
-              type="file"
-              name="documents"
-              multiple
-              onChange={handleFileChange}
-              accept="application/pdf"
-            />
+            </label><br />
+            <input type="file" multiple onChange={handleFileChange} accept="application/pdf"/>
             {/* <input
               type="file"
               multiple
@@ -439,8 +295,8 @@ function CreatePost() {
             </div> */}
             <br />
             <br />
-            <div className="container d-flex flex-column justify-content-center align-items-center">
-              <button className="btn btn-primary center">Create Post</button>
+            <div class="container d-flex flex-column justify-content-center align-items-center">
+            <button className="btn btn-primary center">Create Post</button>
             </div>
           </form>
         </div>
