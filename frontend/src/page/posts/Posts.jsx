@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from 'react-router-dom';
 import defaultAvatar from '../profile/profile.jpg';
 import "../posts/post.css";
+import { toast } from 'react-toastify';
 
 
 export default function Posts(props) {
@@ -12,6 +13,7 @@ export default function Posts(props) {
     const [showBid, setShowBid] = useState(false);
     const [comments, setComments] = useState([]);
     const [bids, setBids] = useState([]);
+    const [bid, setBid] = useState([]);
     const [comment, setComment] = useState();
     const [amount, setAmount] = useState();
     const [commentedUsers, setCommentedUsers] = useState();
@@ -67,6 +69,19 @@ export default function Posts(props) {
                     'content': comment
                 })
             })
+
+            if(response.status == 200){
+                toast.success("Commented successfully", {
+                    position: "top-center",
+                    autoClose: 5000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: "light",
+                  });
+            }
         }
         catch (e) {
             console.log(e);
@@ -75,18 +90,46 @@ export default function Posts(props) {
 
     }
 
-    async function makeBid(amount) {
+    async function makeBid() {
         try {
-            const response = await fetch(`http://localhost:4000/api/post/${post._id}/bids/create`, {
+            const response = await fetch(`http://localhost:4000/api/post/${post._id}/bid/create`, {
                 method: "POST",
                 headers: {
                     'Content-Type': 'application/json',
                     'auth_token': localStorage.getItem('devlinktoken')
                 },
                 body: JSON.stringify({
-                    'amount': amount
+                    'amount': (parseInt(bid))
                 })
-            })
+            });
+
+            if(response.status == 200){
+                toast.success("Bid posted successfully", {
+                    position: "top-center",
+                    autoClose: 5000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: "light",
+                  });
+            }
+
+            if(response.status == 401){
+                toast.error("Already bid posted, to change please delete it and re-post new bid", {
+                    position: "top-center",
+                    autoClose: 5000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: "light",
+                  });
+            }
+
+            console.log(response);
 
         }
         catch (e) {
@@ -124,6 +167,7 @@ export default function Posts(props) {
         if (showBid) {
             setShowBid(false);
         }
+        setBid('')
     };
 
     function timeAgo(date) {
@@ -172,6 +216,28 @@ export default function Posts(props) {
         }
     }
 
+
+    const deleteBid = async (id) => {
+        try {
+            const response = await fetch(`http://localhost:4000/api/post/bid/` + id, {
+                method: "DELETE",
+                headers: {
+                    'Content-Type': 'application/json',
+                    'auth_token': localStorage.getItem('devlinktoken')
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error('Network response was not ok ' + response.statusText);
+            }
+
+            fetchBid();
+        } catch (error) {
+            console.error('Error deleting bid:', error);
+        }
+    }
+
+
     async function fetchUser(){
         try{
             const response = await fetch(`http://localhost:4000/api/profile`, {
@@ -187,8 +253,6 @@ export default function Posts(props) {
             }
             const user =await  response.json();
             setCurrentUser(user._id);
-            console.log(currentUser);
-
         } 
         catch(e){
 
@@ -203,7 +267,7 @@ export default function Posts(props) {
         <>
             <div className="post" id="post_">
                 <div className="post_meta">
-                    <img src={user.profilePhotoURL ? 'http://localhost:4000/api/profile/photo/' + user.profilePhotoURL : defaultAvatar} alt="" className="profile" onClick={(e) => { navigate("/profile/" + user.id); }} />
+                    <img src={(user.profilePhotoURL)? 'http://localhost:4000/api/profile/photo/' + user.profilePhotoURL : defaultAvatar} alt="" className="profile" onClick={(e) => { navigate("/profile/" + user.id); }} />
                     <div className="name">
                         <span><b>{user.firstName + " " + user.lastName}</b></span>
                         <span>{user.username}</span>
@@ -363,18 +427,23 @@ export default function Posts(props) {
                     <div className="container1">
                         <div className="details1">
 
-                            {/* commentSection */}
+                            {/* Bidding section */}
                             <div className="comment-section1" style={{ borderBottom: "1px solid #00000029" }}>
-                                {bids.map((bid, index) => {
+                                {bids.map((comment, index) => {
                                     return (
-                                        <p className="comm" key={bid._id + 'comments' + index}>
+                                        <p className="comm" key={comment._id + 'comments' + index} style={{display:'flex', justifyContent:'space-between'}}>
                                             <div>
-                                                
+                                            <img style={{width:'50px', height:'50px', marginRight:'20px'}} src={comment.user.profilePhotoURL ? 'http://localhost:4000/api/profile/photo/' + comment.user.profilePhotoURL : defaultAvatar} alt="" className="profile" onClick={(e) => { navigate("/profile/" + comment.user._id); }} />
                                             <span className="commenter1" style={{ fontWeight: "bolder" }}>
-                                                {bid.user.username}{" "}
+                                                {comment.user.username}{" "}
                                             </span>
-                                            <span className="commentText1">₹{'' + bid.amount}</span>
+                                            <span className="commentText1">{' ₹'+comment.amount}</span>
                                             </div>
+                                            
+                                            {
+                                            (comment.user._id==currentUser) &&
+                                            (<span style={{marginRight:'50px', color:'red'}} onClick={ ()=> {deleteBid(comment._id)}}>X</span>)
+                                        }
                                         </p>
                                     );
                                 })}
@@ -383,15 +452,15 @@ export default function Posts(props) {
                             {/* add Comment */}
                             <div className="add-comment1">
                                 <input
-                                    type="text"
+                                    type="number"
                                     placeholder="Bid!!"
-                                    value={comment}
+                                    value={bid}
                                     onChange={(e) => { setBid(e.target.value) }}
                                 />
                                 <button
                                     className="comment1"
                                     onClick={() => {
-                                        makeBid(comment);
+                                        makeBid();
                                         toggleBid();
                                     }}
                                 >
