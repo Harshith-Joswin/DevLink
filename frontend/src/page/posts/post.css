@@ -1,39 +1,16 @@
-
-
-.card1{
-    max-width: 500px;
-    height: max-content;
-    margin: 25px auto;
-    border: 1px solid rgb(173, 173, 173);
-    border-radius: 5px;
-}
-
-.card-header1{
+.container1{
     display: flex;
+    width: 50%;
+    background-color: white;
+    height: 500px;
+
 }
 
-.card-header1 > h5{
-    margin: 0;
-    padding: 11px;
-}
-
-.card-pic1 img{
-    width: 30px;
-    border-radius: 30px;
-    height: auto;
-    object-fit: contain;
-    padding: 5px;
-}
-
-.card-image1 img{
+.details1{
     width: 100%;
-}
-
-.card-content1{
-    text-align: left;
-    line-height: 4px;
-    padding: 3px 10px;
-    border-bottom: 1px solid rgb(173, 173, 173)
+    height: inherit;
+    display: flex;
+    flex-direction: column;
 }
 
 .add-comment1{
@@ -57,14 +34,6 @@
 }
 
 
-.material-symbols-outlined-red1{
-    color: red;
-  font-variation-settings:
-  'FILL' 1,
-  'wght' 700,
-  'GRAD' 0,
-  'opsz' 48
-}
 .material-symbols-outlined1{
     cursor: pointer;
 }
@@ -82,36 +51,11 @@
     
 }
 
-.container1{
-    display: flex;
-    width: 50%;
-    background-color: white;
-    height: 500px;
-
-}
-
-.postPic1{
-    background-color: black;
-    display: flex;
-    align-items: center;
-}
-
-.postPic1 img{
-    object-fit: contain;
-    width: 100%;
-}
-
-.details1{
-    width: 100%;
-    height: inherit;
-    display: flex;
-    flex-direction: column;
-}
-
 .comment-section1{
     flex-grow: 4;
     text-align: left;
     margin-left: 10px;
+    overflow: scroll;
 }
 
 .close-comment1{

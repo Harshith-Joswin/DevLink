@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { useParams } from "react-router-dom";
+import Navbar from "../nav/Navbar";
+import Post from "../posts/Posts";
 
 // Importing the images
 import reactLogo from "../../assets/react.svg";
@@ -9,30 +11,24 @@ import profileImage from "./profile.jpg";
 
 function Profile() {
   const token = localStorage.getItem("devlinktoken");
-  let navigate = useNavigate();
-  const logout =() =>{
-    localStorage.removeItem('devlinktoken');
-    navigate("/")
-  }
   const { slug } = useParams();
-
+  const [posts, setPosts] = useState([]);
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [data, setData] = useState({
+    id: "",
     username: "",
-    email: "",
     firstName: "",
     lastName: "",
     occupation: "",
     profilePhotoURL: "",
     skills: [],
     bio: "",
+    isFollowing: false,
   });
 
-
-  //http://localhost:4000/api/profile/66480c30922b2ee16da8116b
-
-  //http://localhost:4000/api/profile:66480c30922b2ee16da8116b
-  useEffect(() => {
-    axios
+  async function fetchData() {
+    await axios
       .post(
         `http://localhost:4000/api/profile/${slug}`,
         {},
@@ -42,12 +38,12 @@ function Profile() {
           },
         }
       )
-      .then((res) => {
+      .then(async (res) => {
         if (res.status === 200) {
           setData((prevFormError) => ({
             ...prevFormError,
+            id: res.data.id,
             username: res.data.username,
-            email: res.data.email,
             firstName: res.data.firstName,
           }));
 
@@ -55,6 +51,13 @@ function Profile() {
             setData((prevFormError) => ({
               ...prevFormError,
               lastName: res.data.lastName,
+            }));
+          }
+
+          if (res.data.isFollowing) {
+            setData((prevFormError) => ({
+              ...prevFormError,
+              isFollowing: true,
             }));
           }
 
@@ -86,165 +89,163 @@ function Profile() {
             }));
           }
         }
+        else {
+          console.log(res);
+        }
+
+
+        try {
+          const response = await fetch("http://localhost:4000/api/profile/posts/" + res.data.id + "?page=1&limit=10", {
+            method: "POST",
+            headers: {
+              "auth_token": localStorage.getItem('devlinktoken')
+            }
+          });
+
+
+          const json = await response.json();
+          const posts = json.posts;
+
+          // Set posts
+          setPosts(posts);
+          setLoading(false);
+        } catch (error) {
+          console.error("Error fetching data:", error);
+        }
+
+
       })
       .catch((error) => {
         console.error(error);
       });
+  }
+
+  useEffect(() => {
+    fetchData();
   }, []);
 
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     try {
-  //       const response = await axios.post(
-  //         "http://localhost:4000/api/profile/66480c30922b2ee16da8116b",
-  //         {},
-  //         {
-  //           headers: {
-  //             auth_token: `${token}`,
-  //           },
-  //         }
-  //       );
 
-  //       if (response.status === 200) {
-  //         const {
-  //           username,
-  //           email,
-  //           firstName,
-  //           lastName,
-  //           occupation,
-  //           profilePhotoURL,
-  //           skills,
-  //           bio,
-  //           dateOfBirth,
-  //         } = response.data;
+  const handleFollow = async () => {
+    try {
+      let res;
+      if(data.isFollowing)
+      res = await fetch("http://localhost:4000/api/profile/" + data.id + "/unfollow", {
+        method: "POST",
+        headers: {
+          "auth_token": localStorage.getItem('devlinktoken')
+        }
+      });
+      else
+      res = await fetch("http://localhost:4000/api/profile/" + data.id + "/follow", {
+        method: "POST",
+        headers: {
+          "auth_token": localStorage.getItem('devlinktoken')
+        }
+      });
 
-  //         setData({
-  //           username,
-  //           email,
-  //           firstName,
-  //           lastName,
-  //           occupation,
-  //           profilePhotoURL,
-  //           skills,
-  //           bio,
-  //           dateOfBirth: dateOfBirth ? newDOB(dateOfBirth) : "",
-  //         });
-  //       }
-  //     } catch (error) {
-  //       console.error(error);
-  //     }
-  //   };
+      if (res.status == 200) {
+        if(data.isFollowing){
+            setData((prevFormError) => ({
+              ...prevFormError,
+              isFollowing: false,
+            }))         
+        }
+        else{
+          setData((prevFormError) => ({
+            ...prevFormError,
+            isFollowing: true,
+          })) 
+        }
+      }
+    }
+    catch (e) {
 
-  //   fetchData();
-  // }, [token]);
+    }
+  }
+
+
+  if (loading) {
+    return (
+      <>
+        <Navbar />
+        <main id="main">
+          Loading..
+        </main>
+      </>
+    );
+  }
 
   return (
     <>
-    <nav className="navbar bg-dark bg-body-tertiary p-3" data-bs-theme="dark">
-      <div className="navbar-brand ms-sm-3 ms-1">
-        <img
-          src={reactLogo}
-          alt="Bootstrap"
-          // width="40"
-          height="40"
-        />
-        <a href="/" className="text-reset text-decoration-none mx-2">
-          DevLink
-        </a>
-      </div>
-      <div className="navbar-item">
-        <a
-          href="#"
-          className="btn btn-primary p-sm-2 p-2 mx-sm-2 mx-1 "
-          onClick={logout}
-        >
-          Logout
-        </a>
-        {/* <a href="#" className="btn btn-primary p-sm-2 p-2 mx-sm-2 mx-1 ">Profile</a> */}
-      </div>
-    </nav>
+      <Navbar></Navbar>
+      <main id="main">
+        <div className=" d-flex justify-content-center p-2 bg-light text-black main">
+          <div style={{ width: "80%" }}>
+            <div className="row my-5">
+              <div className="col-6">
+                <img
+                  src={data.profilePhotoURL ? data.profilePhotoURL : profileImage}
+                  alt="profile"
+                  width="200"
+                  height="200"
+                  className="profile-photo"
+                  style={{ width: '200px', height: '200px', objectFit: 'cover' }}
+                />
+              </div>
+              <div className="col">
+                <div className="d-flex flex-row ">
+                  <strong className="my-2 fs-2">{data.firstName} {data.lastName}</strong>
+                  <button
+                    className={data.isFollowing ? "btn btn-secondary mx-5 my-2" : "btn btn-primary mx-5 my-2"} style={{ width: '100px', height: '40px' }}
+                    onClick={handleFollow}
+                  >
+                    {data.isFollowing ? 'Unfollow' : 'Follow'}
+                  </button>
+                </div>
 
-    <div className=" d-flex justify-content-center p-2 bg-dark text-white main">
-      <div style={{ width: "50%" }}>
-        {/* <div className="container"> */}
-        <div className="row my-5">
-          <div className="col-6">
-            <img
-              src={data.profilePhotoURL ? data.profilePhotoURL : profileImage}
-              alt="profile"
-              width="200"
-              height="200"
-              className="profile-photo"
-              style={{ width: '200px', height: '200px', objectFit: 'cover' }}
-            />
-          </div>
-          <div className="col">
-            <div className="d-flex flex-row ">
-              <strong className="my-2 fs-3">{data.username}</strong>
+                <div className="row">
+                  <span className="fs-5 p-1 m-2">
+                    {data.username}
+                  </span>
+                </div>
 
-              <a
-                className="btn btn-primary mx-5 my-2 p-1"
-                href="#"
-              >
-                Follow
-              </a>
-            </div>
+                <div className="details d-flex flex-row p-1 row">
+                  {data.bio && (
+                    <span className="fs-5 my-1">
+                      Bio:
+                      <span className="fs-6">{data.bio}</span>
+                    </span>
+                  )}
 
-            <div className="row">
-              <span className="fs-5 p-1 m-2">
-                {data.firstName} {data.lastName}
-              </span>
-            </div>
+                  {data.skills != "" && (
+                    <span className="fs-5 my-1">
+                      Skills:
+                      <span className="fs-6"> {data.skills} </span>
+                    </span>
+                  )}
 
-            {/* <div className="d-flex flex-row p-1 col">
-              <span className="fs-5 my-2">5 posts</span>
-              <span className="fs-5 my-2 ms-3">5 followers</span>
-              <span className="fs-5 my-2 ms-3">5 following</span>
-            </div> */}
+                  {data.occupation && (
+                    <span className="fs-5 my-1">
+                      Occupation:{" "}
+                      <span className="fs-6"> {data.occupation} </span>
+                    </span>
+                  )}
 
-            <div className="details d-flex flex-row p-1 row">
-              {data.bio && (
-                <span className="fs-5 my-1">
-                  Bio:
-                  <span className="fs-6">{data.bio}</span>
-                </span>
-              )}
 
-              {data.email && (
-                <span className="fs-5 my-1">
-                  Email: <span className="fs-6"> {data.email} </span>
-                </span>
-              )}
-
-              {data.dateOfBirth && (
-                <span className="fs-5 my-1">
-                  Date of Birth:
-                  <span className="fs-6"> {data.dateOfBirth} </span>
-                </span>
-              )}
-
-              {data.skills != "" && (
-                <span className="fs-5 my-1">
-                  Skills:
-                  <span className="fs-6"> {data.skills} </span>
-                </span>
-              )}
-
-              {data.occupation && (
-                <span className="fs-5 my-1">
-                  Occupation:{" "}
-                  <span className="fs-6"> {data.occupation} </span>
-                </span>
-              )}
+                </div>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    </div>
-    {/* </div> */}
-  </>
-      );
-    }
+
+        {posts.map((post, index) => (
+          <Post key={post.id} post={post} user={data} />
+        ))}
+
+      </main>
+    </>
+  );
+}
 
 
 export default Profile;

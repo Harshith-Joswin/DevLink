@@ -344,13 +344,16 @@ router.delete('/comment/:commentId', fetchUser, (req, res) => {
     Comment.findById(req.params.commentId)
         .then(comment => {
             if (req.user.id == comment.user.toString()) {
-                Comment.findByIdAndDelete(req.params.commentId)
+                Comment.findOneAndDelete({_id:req.params.commentId})
                     .then(comment => {
                         return res.json({ message: "comment deleted successfully" });
                     })
                     .catch(error => {
                         return res.json({ message: "comment could not be deleted" });
                     })
+            }
+            else{
+                return res.status(401).json({message: "user not authorized"})
             }
         })
         .catch(error => {
@@ -513,14 +516,15 @@ async function recommendedPosts(userId, page, limit) {
         const followingUsers = (await Follow.find({ follower: user._id })).map(follow => follow.following);
         let skip = (page - 1) * limit;
 
-        const likedPosts = await Like.find({user:userId});
+        const likedPosts = (await Like.find({user:userId})).map(like => like.post);
         const daysDiff = ((new Date()).getDate() - 5);
+        
         const totalCount = await Post.aggregate([
             {
                 $match: {
                     $and: [
                         { user: { $in: followingUsers } },
-                        { createdAt: { $gte: daysDiff } },
+                        // { createdAt: { $gte: daysDiff } },
                         { isHandovered: { $ne: true } }
                     ]
                 }
@@ -531,8 +535,6 @@ async function recommendedPosts(userId, page, limit) {
         ]);
         let followingPosts = [];
 
-
-
         if (totalCount.length > (page - 1) * limit) {
             followingPosts = await Post.aggregate([
                 // Match posts with at least one matching platform or technology
@@ -542,9 +544,9 @@ async function recommendedPosts(userId, page, limit) {
                             {
                                 user: { $in: followingUsers }
                             },
-                            {
-                                createdAt: { $gte: daysDiff }
-                            },
+                            // {
+                            //     createdAt: { $gte: daysDiff }
+                            // },
                             { isHandovered: { $ne: true } }
                         ]
                     }
@@ -570,7 +572,7 @@ async function recommendedPosts(userId, page, limit) {
                         documentsURL:1,
                         likesCount: 1,
                         commentsCount: 1,
-                        isLiked: { $in: ['$_id', likedPosts] }
+                        isLiked: { $in: ["$_id", likedPosts] }
                     }
                 },
                 {
@@ -619,7 +621,7 @@ async function recommendedPosts(userId, page, limit) {
                         documentsURL:1,
                         likesCount: 1,
                         commentsCount: 1,
-                        isLiked: { $in: ['$_id', likedPosts] },
+                        isLiked: { $in: ["$_id", likedPosts] },
                         totalScore: {
                             $add: [
                                 {
@@ -714,7 +716,8 @@ router.post('/', fetchUser, async (req, res) => {
             });
     }
     catch (e) {
-
+        console.log("Error while sending recommended posts: ",e);
+        return res.status(500).json({ message: "Internal server Error" });
     }
 })
 
@@ -776,7 +779,7 @@ router.post('/:postId/bid/create', fetchUser, [
     }
 });
 
-router.delete('/:bidId', fetchUser, async (req, res) => {
+router.delete('/bid/:bidId', fetchUser, async (req, res) => {
     try {
         const bid = await Bid.findById(req.params.bidId)
         if (!bid) {
@@ -910,6 +913,113 @@ async function getBids(postId, page, limit) {
         throw error;
     }
 }
+
+
+
+
+async function acceptedPosts(userId, page, limit) {
+    try {
+        const user = await User.findById(userId);
+        let skip = (page - 1) * limit;
+
+        const likedPosts = (await Like.find({user:userId})).map(like => like.post);
+        
+       
+            followingPosts = await Post.aggregate([
+                // Match posts with at least one matching platform or technology
+                {
+                    $match: { developer: user._id}
+                },
+                {
+                    $limit: limit
+                },
+                {
+                    $skip: skip
+                },
+                {
+                    $project: {
+                        _id: 1,
+                        user: 1,
+                        createdAt: 1,
+                        title: 1,
+                        description:1,
+                        platforms: 1,
+                        technologies: 1,
+                        budget: 1,
+                        biddingEndDate: 1,
+                        imagesURL: 1,
+                        documentsURL:1,
+                        likesCount: 1,
+                        commentsCount: 1,
+                        isLiked: { $in: ["$_id", likedPosts] }
+                    }
+                },
+                {
+                    $sort: { projectEndDate: 1 }
+                }
+            ]);
+
+
+
+
+
+        return followingPosts;
+    } catch (error) {
+        console.error("Error fetching accepted posts:", error);
+        throw error;
+    }
+}
+
+router.post('/accepted', fetchUser, async (req, res) => {
+    try {
+        let page = parseInt(req.query.page);
+        let limit = parseInt(req.query.limit);
+
+        if (page < 0) {
+            return res.status(400).json({ message: "invalid page number" });
+        }
+        else if (limit < 0) {
+            return res.status(400).json({ message: "invalid limit" });
+        }
+
+        acceptedPosts(req.user.id, page, limit)
+            .then(async posts => {
+                let result = { count: posts.length };
+                if (page > 1) {
+                    result.previous = {
+                        page: page - 1,
+                        limit: limit
+                    }
+                }
+                if (posts.length == limit) {
+                    result.next = {
+                        page: page + 1,
+                        limit: limit
+                    };
+                }
+                let temp = [];
+
+                for (const post of posts) {
+                    const topBid = await getBids(post._id, 1, 1);
+                    post.topBid = topBid.amount;
+                    temp.push(post);
+                }
+
+
+                result.posts = temp;
+
+                res.json(result)
+            })
+            .catch(error => {
+                // Handle any errors
+                console.error("Error:", error);
+            });
+    }
+    catch (e) {
+        console.log("Error while sending accepted posts: ",e);
+        return res.status(500).json({ message: "Internal server Error" });
+    }
+})
 
 //error handling
 router.use((err, req, res, next) => {
