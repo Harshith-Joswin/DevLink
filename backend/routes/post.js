@@ -70,6 +70,7 @@ router.post('/create', fetchUser, upload.fields([
         });
     }
     try {
+
         User.findById(req.user.id)
             .then(user => {
                 let { title, description, platforms, technologies, budget, biddingEndDate, projectEndDate } = req.body;

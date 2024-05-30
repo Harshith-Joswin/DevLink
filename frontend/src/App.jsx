@@ -5,7 +5,6 @@ import "../node_modules/bootstrap/dist/js/bootstrap.bundle.min.js";
 import Home from "./page/home/Home.jsx";
 import Login from "./page/login/Login.jsx";
 import Register from "./page/register/Register.jsx";
-import ProjectFeed from "./page/projectfeed/ProjectFeed.jsx";
 import NotFound from "./page/notfound/NotFound.jsx";
 import Messages from "./page/messages/Messages.jsx";
 import UserProfile from "./page/user_profile/UserProfile.jsx";
@@ -21,26 +20,31 @@ import "react-toastify/dist/ReactToastify.css";
 import PrivateRoute from "./PrivateRoute";
 import AutoLogin from "./AutoLogin.jsx";
 
+
+import Navbar from "./page/nav/Navbar.jsx";
+
 function App() {
   return (
     <>
-      <ToastContainer />
+      <ToastContainer />  
       <Routes>
         <Route element={<AutoLogin />}>
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
         </Route>
-
         <Route element={<PrivateRoute />}>
-          <Route path="/feed" element={<Feed />} />
-          <Route path="/profile" element={<UserProfile />} />
-          <Route path="/profile/:slug" element={<Profile />} />
-          <Route path="/profupdate" element={<ProfUpdate />} />
-          <Route path="/myposts" element={<MyPosts />} />
-          <Route path="/projectAccepted" element={<UnderDevelopment />} />
-          <Route path="/message" element={<UnderDevelopment />} />
-          <Route path="/create-post" element={<CreatePost />} />
+          
+        
+          <Route path="/feed" element={<><Navbar /><Feed /></>} />
+          <Route path="/profile" element={<><Navbar /><UserProfile /></>} />
+          <Route path="/profile/:slug" element={<><Navbar /><Profile /></>} />
+          <Route path="/profupdate" element={<><Navbar /><ProfUpdate /></>} />
+          <Route path="/myposts" element={ <>   
+      <Navbar /> <MyPosts /></>} />
+          <Route path="/projectAccepted" element={<><Navbar /><UnderDevelopment /></>} />
+          <Route path="/message" element={<><Navbar /><UnderDevelopment /></>} />
+          <Route path="/create-post" element={<><Navbar /><CreatePost /></>} />
           <Route path="*" element={<NotFound />} />
         </Route>
       </Routes>

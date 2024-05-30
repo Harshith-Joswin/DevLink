@@ -45,7 +45,6 @@ function CreatePost() {
   const handleBidDateChange = (e) => {
     const { name, value } = e.target;
     setbiddingEndDate((prevData) => ({ ...prevData, [name]: value }));
-    console.log(name,value)
   };
 
   const handleProjDateChange = (e) => {
@@ -70,8 +69,8 @@ function CreatePost() {
   };
 
   const handleFileEvent = (e) => {
-    const chosenFiles = Array.prototype.slice.call(e.target.files[0]);
-    handleUploadFiles(chosenFiles);
+    const chosenFiles = Array.prototype.slice.call(e.target.files);
+handleUploadFiles(chosenFiles);
   };
 
   const handleUploadFiles = (files) => {
@@ -105,7 +104,7 @@ function CreatePost() {
 
   const handleFileChange = (e) => {
     // setFiles(e.target.files);
-    const chosenFiles = Array.prototype.slice.call(e.target.files[0]);
+    const chosenFiles = Array.prototype.slice.call(e.target.files);
     handlePDFFile(chosenFiles);
   };
 
@@ -121,27 +120,31 @@ function CreatePost() {
     e.preventDefault();
 
     const formValue = new FormData();
-    
-    if(formData.title)
-        formValue.append('title', formData.title);
-    if(formData.description)
-        formValue.append('description', formData.description);
-    if(formData.biddingEndDate)
-        formValue.append('biddingEndDate', biddingEndDate.year + '-' + biddingEndDate.month + '-' + biddingEndDate.date);
-    if(formData.projectEndDate)
-        formValue.append('projectEndDate', projectEndDate.year + '-' + projectEndDate.month + '-' + projectEndDate.date);
-    if(formData.platforms)
-        formValue.append('platforms', formData.platforms);
-    if(formData.technologies)
-        formValue.append('technologies', formData.technologies);
-    if(uploadedFiles)
-        formValue.append('images', [uploadedFiles]);
-    if(files)
-        formValue.append('documents', [files]);
-    if(formData.budget)
-        formValue.append('budget', formData.budget)
 
-    console.log(formValue);
+    if (formData.title)
+      formValue.append('title', formData.title);
+    if (formData.description)
+      formValue.append('description', formData.description);
+    if (formData.biddingEndDate)
+      formValue.append('biddingEndDate', biddingEndDate.year + '-' + biddingEndDate.month + '-' + biddingEndDate.date);
+    if (formData.projectEndDate)
+      formValue.append('projectEndDate', projectEndDate.year + '-' + projectEndDate.month + '-' + projectEndDate.date);
+    if (formData.platforms)
+      formValue.append('platforms', formData.platforms);
+    if (formData.technologies)
+      formValue.append('technologies', formData.technologies);
+    // if(uploadedFiles)
+    //     formValue.append('images', [uploadedFiles]);
+    // if(files)
+    //     formValue.append('documents', [files]);
+    uploadedFiles.forEach((file) => {
+      formValue.append('images', file);
+    });
+    files.forEach((file) => {
+      formValue.append('documents', file);
+    });
+    if (formData.budget)
+      formValue.append('budget', formData.budget)
     // console.log(files[0]);
 
     // const form2val = {

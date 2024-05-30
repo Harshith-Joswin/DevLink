@@ -11,7 +11,8 @@ export default function Feed() {
     const [posts, setPosts] = useState([]);
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
-    const navigate = useNavigate(); const [data, setData] = useState({
+    const navigate = useNavigate(); 
+    const [data, setData] = useState({
         username: "",
         email: "",
         firstName: "",
@@ -132,18 +133,13 @@ export default function Feed() {
     if (loading) {
         return 
         (
-            <>
-            <Navbar />
             <main id="main">
                 Loading..
             </main>
-            </>
         );
     }
 
     return (
-        <>
-            <Navbar />
             <main id="main">
                 <div className="create_post" onClick={()=>{navigate("/create-post")}}>
                     <img src={data.profilePhotoURL ? data.profilePhotoURL : defaultAvatar} alt="profile" className="profile" />
@@ -155,7 +151,6 @@ export default function Feed() {
                     ))
                 }
             </main>
-        </>
     );
 };
 

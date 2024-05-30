@@ -166,18 +166,13 @@ function Profile() {
 
   if (loading) {
     return (
-      <>
-        <Navbar />
         <main id="main">
           Loading..
         </main>
-      </>
     );
   }
 
   return (
-    <>
-      <Navbar></Navbar>
       <main id="main">
         <div className=" d-flex justify-content-center p-2 bg-light text-black main">
           <div style={{ width: "80%" }}>
@@ -243,7 +238,6 @@ function Profile() {
         ))}
 
       </main>
-    </>
   );
 }
 

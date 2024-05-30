@@ -294,31 +294,7 @@ function ProfUpdate() {
 
 
   return (
-    <div>
-      <>
-        <nav
-          className="navbar bg-dark bg-body-tertiary p-3"
-          data-bs-theme="dark"
-        >
-          <div className="navbar-brand ms-sm-3 ms-1">
-            <img
-              src={reactLogo}
-              alt="Bootstrap"
-              // width="40"
-              height="40"
-            />
-            <a href="/" className="text-reset text-decoration-none mx-2">
-              DevLink
-            </a>
-          </div>
-          <div className="navbar-item">
-            <a href="/#" className="btn btn-primary p-sm-2 p-2 mx-sm-2 mx-1 " onClick={logout}>
-              Logout
-            </a>
-          </div>
-        </nav>
-
-        <div className="bx-grow container d-flex flex-column align-items-center justify-content-center">
+        <div className="main bx-grow container d-flex flex-column align-items-center justify-content-center" id="main">
           <h1>Update Profile</h1>
           <div className="container">
           <form  method="POST" onSubmit={handleSubmit} className="form-control p-3 m-2" 
@@ -566,8 +542,6 @@ function ProfUpdate() {
               </form>
           </div>
         </div>
-      </>
-    </div>
   );
 }
 

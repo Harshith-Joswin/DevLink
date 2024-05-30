@@ -80,7 +80,7 @@ export default function Navbar() {
           </div>
           <div
             className={
-              currentUrl == "http://localhost:5173/profile"
+              currentUrl == "http://localhost:5173/profile" || currentUrl == "http://localhost:5173/profupdate" || currentUrl.startsWith("http://localhost:5173/profile/")
                 ? "tab active"
                 : "tab"
             }
