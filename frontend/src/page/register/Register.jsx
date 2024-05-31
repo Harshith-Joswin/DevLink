@@ -256,6 +256,7 @@ function Register() {
             onSubmit={handleSubmit}
           >
             <label htmlFor="email" className="form-label">
+            <span className="req-field">* </span>
               Enter Email:
             </label>
             <input
@@ -272,6 +273,7 @@ function Register() {
             <br />
 
             <label htmlFor="username" className="form-label">
+            <span className="req-field">* </span>
               Enter Username:
             </label>
             <input
@@ -290,6 +292,7 @@ function Register() {
             <br />
 
             <label htmlFor="firstname" className="form-label">
+            <span className="req-field">* </span>
               Enter Firstname:
             </label>
             <input
@@ -308,6 +311,7 @@ function Register() {
             <br />
 
             <label htmlFor="dateOfBirth" className="form-label">
+            <span className="req-field">* </span>
               Enter Date of Birth:
             </label>
             <div className="row">
@@ -371,6 +375,7 @@ function Register() {
             <br />
 
             <label htmlFor="password" className="form-label">
+            <span className="req-field">* </span>
               Enter Password:
             </label>
             <input
@@ -394,6 +399,7 @@ function Register() {
             <br />
 
             <label htmlFor="confirmPassword" className="form-label">
+            <span className="req-field">* </span>
               Confirm Password:
             </label>
             <input

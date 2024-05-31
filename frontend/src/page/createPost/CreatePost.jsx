@@ -2,9 +2,12 @@ import React from "react";
 import reactLogo from "../../assets/react.svg";
 import { toast } from "react-toastify";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
+// import './createPost.css'
 
 function CreatePost() {
+  const navigate = useNavigate();
   const monthNames = [
     "January",
     "February",
@@ -70,7 +73,7 @@ function CreatePost() {
 
   const handleFileEvent = (e) => {
     const chosenFiles = Array.prototype.slice.call(e.target.files);
-handleUploadFiles(chosenFiles);
+    handleUploadFiles(chosenFiles);
   };
 
   const handleUploadFiles = (files) => {
@@ -121,30 +124,55 @@ handleUploadFiles(chosenFiles);
 
     const formValue = new FormData();
 
-    if (formData.title)
-      formValue.append('title', formData.title);
+    if (formData.title) formValue.append("title", formData.title);
     if (formData.description)
-      formValue.append('description', formData.description);
+      formValue.append("description", formData.description);
     if (formData.biddingEndDate)
-      formValue.append('biddingEndDate', biddingEndDate.year + '-' + biddingEndDate.month + '-' + biddingEndDate.date);
+      formValue.append(
+        "biddingEndDate",
+        biddingEndDate.year +
+          "-" +
+          biddingEndDate.month +
+          "-" +
+          biddingEndDate.date
+      );
     if (formData.projectEndDate)
-      formValue.append('projectEndDate', projectEndDate.year + '-' + projectEndDate.month + '-' + projectEndDate.date);
-    if (formData.platforms)
-      formValue.append('platforms', formData.platforms);
-    if (formData.technologies)
-      formValue.append('technologies', formData.technologies);
+      formValue.append(
+        "projectEndDate",
+        projectEndDate.year +
+          "-" +
+          projectEndDate.month +
+          "-" +
+          projectEndDate.date
+      );
+    if (formData.platforms) {
+      let platString = formData.platforms;
+      let platSubString = platString.split(",");
+      let platformArray = platSubString.map((substring) => substring.trim());
+      platformArray.forEach((element)=>{
+        formValue.append("platforms", element);
+      })
+    }
+
+    if (formData.technologies) {
+      let techString = formData.technologies;
+      let techSubStrings = techString.split(",");
+      let technologyArray = techSubStrings.map((str) => str.trim());
+      technologyArray.forEach((element)=>{
+        formValue.append("technologies", element);
+      })
+    }
     // if(uploadedFiles)
     //     formValue.append('images', [uploadedFiles]);
     // if(files)
     //     formValue.append('documents', [files]);
     uploadedFiles.forEach((file) => {
-      formValue.append('images', file);
+      formValue.append("images", file);
     });
     files.forEach((file) => {
-      formValue.append('documents', file);
+      formValue.append("documents", file);
     });
-    if (formData.budget)
-      formValue.append('budget', formData.budget)
+    if (formData.budget) formValue.append("budget", formData.budget);
     // console.log(files[0]);
 
     // const form2val = {
@@ -163,17 +191,24 @@ handleUploadFiles(chosenFiles);
     const token = localStorage.getItem("devlinktoken");
 
     axios
-      .post(
-        "http://localhost:4000/api/post/create",
-        formValue,
-        {
-          headers: {
-            auth_token: `${token}`,
-          },
-        }
-      )
+      .post("http://localhost:4000/api/post/create", formValue, {
+        headers: {
+          auth_token: `${token}`,
+        },
+      })
       .then((res) => {
         console.log("success:", res);
+        toast.success("Post Uploaded Successfully", {
+          position: "top-center",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light",
+        });
+        navigate("/myposts");
       })
       .catch((e) => {
         console.log("Failed:", e.response);
@@ -182,7 +217,7 @@ handleUploadFiles(chosenFiles);
 
   return (
     <>
-      <nav className="navbar bg-dark bg-body-tertiary p-3" data-bs-theme="dark">
+      {/* <nav className="navbar bg-dark bg-body-tertiary p-3" data-bs-theme="dark">
         <div className="navbar-brand ms-sm-3 ms-1">
           <img
             src={reactLogo}
@@ -194,12 +229,12 @@ handleUploadFiles(chosenFiles);
             DevLink
           </a>
         </div>
-        {/* <div className="navbar-item">
+         <div className="navbar-item">
           <a href="/register" className="btn btn-primary p-sm-2 p-2 mx-sm-2 mx-1 ">
             Register
           </a>
-        </div> */}
-      </nav>
+        </div> 
+      </nav> */}
 
       <div className="bx-grow container d-flex flex-column align-items-center justify-content-center">
         <h1>Create Post</h1>
@@ -211,6 +246,7 @@ handleUploadFiles(chosenFiles);
             onSubmit={handleSubmit}
           >
             <label htmlFor="title" className="form-label">
+              <span className="req-field">* </span>
               Enter Title:
             </label>
             <input
@@ -223,6 +259,7 @@ handleUploadFiles(chosenFiles);
             <br />
 
             <label htmlFor="description" className="form-label">
+            <span className="req-field">* </span>
               Enter Description:
             </label>
             <textarea
@@ -235,7 +272,8 @@ handleUploadFiles(chosenFiles);
             <br />
 
             <label htmlFor="budget" className="form-label">
-              Enter Budget(in $):
+            <span className="req-field">* </span>
+              Enter Budget(in ₹):
             </label>
             <input
               type="number"
@@ -247,6 +285,7 @@ handleUploadFiles(chosenFiles);
             <br />
 
             <label htmlFor="biddingEndDate" className="form-label">
+            <span className="req-field">* </span>
               Enter Bidding End Date:
             </label>
             <div className="row">
@@ -302,6 +341,7 @@ handleUploadFiles(chosenFiles);
             <br />
 
             <label htmlFor="projectEndDate" className="form-label">
+            <span className="req-field">* </span>
               Enter Project End Date:
             </label>
             <div className="row">
@@ -357,6 +397,7 @@ handleUploadFiles(chosenFiles);
             <br />
 
             <label htmlFor="platforms" className="form-label">
+            <span className="req-field">* </span>
               Enter Platforms to develop the project: <br />
               (seperate platforms with commas):
             </label>
@@ -371,6 +412,7 @@ handleUploadFiles(chosenFiles);
             <br />
 
             <label htmlFor="technologies" className="form-label">
+            <span className="req-field">* </span>
               Enter technologies to develop the project: <br />
               (seperate technologies with commas):
             </label>

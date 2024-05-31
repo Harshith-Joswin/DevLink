@@ -227,7 +227,7 @@ function UserProfile() {
                   </span>
                 )}
 
-                {data.skills && (
+                {data.skills && data.skills.length > 0 && (
                   <span className="fs-5 my-1">
                     Skills:
                     <span className="fs-6"> {data.skills} </span>
