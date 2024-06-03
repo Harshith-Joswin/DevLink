@@ -8,51 +8,41 @@ import axios from "axios";
 
 function CreatePost() {
   const navigate = useNavigate();
-  const monthNames = [
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December",
-  ];
 
   const [formData, setFormData] = useState({
     title: "",
     description: "",
     budget: 0,
-    biddingEndDate: "2024-01-01",
-    projectEndDate: "2024-01-01",
     platforms: [],
     technologies: [],
   });
 
-  const [biddingEndDate, setbiddingEndDate] = useState({
-    date: "01",
-    month: "01",
-    year: "2024",
+  const [biddingEndDate, setBiddingEndDate] = useState("");
+  const [projectEndDate, setProjectEndDate] = useState("");
+  const [minProjectEndDate, setMinProjectEndDate] = useState("");
+
+  const [formError, setformError] = useState({
+    title: false,
+    description: false,
+    budget: false,
+    biddingEndDate: false,
+    projectEndDate: false,
+    platforms: false,
+    technologies: false,
   });
 
-  const [projectEndDate, setprojectEndDate] = useState({
-    date: "01",
-    month: "01",
-    year: "2024",
-  });
-
-  const handleBidDateChange = (e) => {
-    const { name, value } = e.target;
-    setbiddingEndDate((prevData) => ({ ...prevData, [name]: value }));
+  const tomorrow = () => {
+    const today = new Date();
+    today.setDate(today.getDate() + 1);
+    return today.toISOString().split("T")[0];
   };
 
-  const handleProjDateChange = (e) => {
-    const { name, value } = e.target;
-    setprojectEndDate((prevData) => ({ ...prevData, [name]: value }));
+  const handleBiddingEndDateChange = (e) => {
+    const selectedDate = e.target.value;
+    setBiddingEndDate(selectedDate);
+    const minDate = new Date(selectedDate);
+    minDate.setDate(minDate.getDate() + 1);
+    setMinProjectEndDate(minDate.toISOString().split("T")[0]);
   };
 
   const [uploadedFiles, setUploadedFiles] = useState([]);
@@ -96,17 +86,7 @@ function CreatePost() {
 
   const [files, setFiles] = useState([]);
 
-  // const handleUpload = () => {
-  //   const formData = new FormData();
-  //   uploadedFiles.forEach((file) => {
-  //     formData.append("files", file);
-  //   });
-  // };
-
-  // const [status, setStatus] = useState("initial");
-
   const handleFileChange = (e) => {
-    // setFiles(e.target.files);
     const chosenFiles = Array.prototype.slice.call(e.target.files);
     handlePDFFile(chosenFiles);
   };
@@ -124,95 +104,172 @@ function CreatePost() {
 
     const formValue = new FormData();
 
-    if (formData.title) formValue.append("title", formData.title);
-    if (formData.description)
+    if (
+      formData.title &&
+      formData.description &&
+      biddingEndDate &&
+      projectEndDate &&
+      formData.platforms.length > 0 &&
+      formData.technologies.length > 0 &&
+      formData.budget
+    ) {
+      formValue.append("title", formData.title);
       formValue.append("description", formData.description);
-    if (formData.biddingEndDate)
-      formValue.append(
-        "biddingEndDate",
-        biddingEndDate.year +
-          "-" +
-          biddingEndDate.month +
-          "-" +
-          biddingEndDate.date
-      );
-    if (formData.projectEndDate)
-      formValue.append(
-        "projectEndDate",
-        projectEndDate.year +
-          "-" +
-          projectEndDate.month +
-          "-" +
-          projectEndDate.date
-      );
-    if (formData.platforms) {
+      formValue.append("biddingEndDate", biddingEndDate);
+      formValue.append("projectEndDate", projectEndDate);
+
       let platString = formData.platforms;
       let platSubString = platString.split(",");
       let platformArray = platSubString.map((substring) => substring.trim());
-      platformArray.forEach((element)=>{
+      platformArray.forEach((element) => {
         formValue.append("platforms", element);
-      })
-    }
+      });
 
-    if (formData.technologies) {
       let techString = formData.technologies;
       let techSubStrings = techString.split(",");
       let technologyArray = techSubStrings.map((str) => str.trim());
-      technologyArray.forEach((element)=>{
+      technologyArray.forEach((element) => {
         formValue.append("technologies", element);
-      })
-    }
-    // if(uploadedFiles)
-    //     formValue.append('images', [uploadedFiles]);
-    // if(files)
-    //     formValue.append('documents', [files]);
-    uploadedFiles.forEach((file) => {
-      formValue.append("images", file);
-    });
-    files.forEach((file) => {
-      formValue.append("documents", file);
-    });
-    if (formData.budget) formValue.append("budget", formData.budget);
-    // console.log(files[0]);
-
-    // const form2val = {
-    //   title: formData.title,
-    //   description: formData.description,
-    //   platforms: [formData.platforms],
-    //   technologies: [formData.technologies],
-    //   budget: formData.budget,
-    //   biddingEndDate: biddingEndDate.year + "-" + biddingEndDate.month + "-" + biddingEndDate.date,
-    //   projectEndDate: projectEndDate.year + "-" + projectEndDate.month + "-" + projectEndDate.date,
-    //   images: [uploadedFiles][0],
-    //   documents: [files]
-    // };
-    // console.log(form2val)
-
-    const token = localStorage.getItem("devlinktoken");
-
-    axios
-      .post("http://localhost:4000/api/post/create", formValue, {
-        headers: {
-          auth_token: `${token}`,
-        },
-      })
-      .then((res) => {
-        console.log("success:", res);
-        toast.success("Post Uploaded Successfully", {
-          position: "top-center",
-          autoClose: 5000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "light",
-        });
-        navigate("/myposts");
-      })
-      .catch((e) => {
-        console.log("Failed:", e.response);
       });
+
+      uploadedFiles.forEach((file) => {
+        formValue.append("images", file);
+      });
+      files.forEach((file) => {
+        formValue.append("documents", file);
+      });
+
+      formValue.append("budget", formData.budget);
+
+      const token = localStorage.getItem("devlinktoken");
+
+      axios
+        .post("http://localhost:4000/api/post/create", formValue, {
+          headers: {
+            auth_token: `${token}`,
+          },
+        })
+        .then((res) => {
+          console.log("success:", res);
+          toast.success("Post Uploaded Successfully", {
+            position: "top-center",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "light",
+          });
+          navigate("/myposts");
+        })
+        .catch((e) => {
+          let obj = e.response.data;
+          console.log("Failed:", e.response);
+          console.log(JSON.stringify(obj, null, 2));
+        });
+    } else {
+      setformError((prevFormError) => ({
+        ...prevFormError,
+        title: false,
+      }));
+      setformError((prevFormError) => ({
+        ...prevFormError,
+        description: false,
+      }));
+      setformError((prevFormError) => ({
+        ...prevFormError,
+        biddingEndDate: false,
+      }));
+
+      setformError((prevFormError) => ({
+        ...prevFormError,
+        projectEndDate: false,
+      }));
+      setformError((prevFormError) => ({
+        ...prevFormError,
+        platforms: false,
+      }));
+      setformError((prevFormError) => ({
+        ...prevFormError,
+        technologies: false,
+      }));
+      setformError((prevFormError) => ({
+        ...prevFormError,
+        budget: false,
+      }));
+    
+
+      if(!(formData.title &&
+        formData.description &&
+        biddingEndDate &&
+        projectEndDate &&
+        formData.platforms.length > 0 &&
+        formData.technologies.length > 0 &&
+        formData.budget)){
+          toast.error("Fill out the required fields", {
+            position: "top-center",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "light",
+          });
+        }
+
+    
+
+    if (!formData.title || formData.title.length < 3) {
+      setformError((prevFormError) => ({
+        ...prevFormError,
+        title: true,
+      }));
+    }
+
+      if (!formData.description || formData.description.length < 5) {
+        setformError((prevFormError) => ({
+          ...prevFormError,
+          description: true,
+        }));
+      }
+
+      if (!biddingEndDate) {
+        setformError((prevFormError) => ({
+          ...prevFormError,
+          biddingEndDate: true,
+        }));
+      }
+
+      if (!projectEndDate) {
+        setformError((prevFormError) => ({
+          ...prevFormError,
+          projectEndDate: true,
+        }));
+      }
+
+      if (!formData.platforms.length > 0) {
+        setformError((prevFormError) => ({
+          ...prevFormError,
+          platforms: true,
+        }));
+      }
+
+      if (!formData.technologies.length > 0) {
+        setformError((prevFormError) => ({
+          ...prevFormError,
+          technologies: true,
+        }));
+      }
+
+      if (!formData.budget) {
+        setformError((prevFormError) => ({
+          ...prevFormError,
+          budget: true,
+        }));
+      }
+    }
   };
 
   return (
@@ -256,10 +313,13 @@ function CreatePost() {
               className="rounded form-control"
               onChange={handleInputChange}
             />
+            {formError.title && (
+              <p className="text-danger m-0">at least 3 characters required</p>
+            )}
             <br />
 
             <label htmlFor="description" className="form-label">
-            <span className="req-field">* </span>
+              <span className="req-field">* </span>
               Enter Description:
             </label>
             <textarea
@@ -269,10 +329,14 @@ function CreatePost() {
               rows="3"
               onChange={handleInputChange}
             ></textarea>
+
+            {formError.description && (
+              <p className="text-danger m-0">at least 5 characters required</p>
+            )}
             <br />
 
             <label htmlFor="budget" className="form-label">
-            <span className="req-field">* </span>
+              <span className="req-field">* </span>
               Enter Budget(in ₹):
             </label>
             <input
@@ -282,122 +346,53 @@ function CreatePost() {
               onChange={handleInputChange}
               className="rounded form-control"
             />
+            {formError.budget && (
+              <p className="text-danger m-0">Budget value required</p>
+            )}
             <br />
 
             <label htmlFor="biddingEndDate" className="form-label">
-            <span className="req-field">* </span>
-              Enter Bidding End Date:
+              <span className="req-field">* </span>
+              Enter Bidding End Date(minimum date tomorrow):
             </label>
-            <div className="row">
-              <div className="col-1">
-                {/* <label className="form-label">Date:</label> */}
-                <select
-                  name="date"
-                  id="date"
-                  className="rounded form-control text-center"
-                  onChange={handleBidDateChange}
-                >
-                  {Array.from({ length: 31 }, (_, i) => i + 1).map((num) => (
-                    <option key={num} value={num.toString().padStart(2, "0")}>
-                      {num.toString().padStart(2, "0")}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="col-2">
-                <select
-                  name="month"
-                  id="month"
-                  className="rounded form-control text-center"
-                  onChange={handleBidDateChange}
-                >
-                  {monthNames.map((month, index) => (
-                    <option
-                      key={index}
-                      value={(index + 1).toString().padStart(2, "0")}
-                    >
-                      {month}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="col-1">
-                <select
-                  name="year"
-                  id="year"
-                  className="rounded form-control text-center"
-                  onChange={handleBidDateChange}
-                >
-                  {Array.from({ length: 50 }, (_, i) => 2024 + i).map((num) => (
-                    <option key={num} value={num}>
-                      {num}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
+            <input
+              type="date"
+              name="biddingEndDate"
+              id="biddingEndDate"
+              pattern="yyyy-mm-dd"
+              className="rounded form-control"
+              min={tomorrow()}
+              value={biddingEndDate}
+              onChange={handleBiddingEndDateChange}
+            />
+            {formError.biddingEndDate && (
+              <p className="text-danger m-0">Bidding date required</p>
+            )}
             <br />
 
             <label htmlFor="projectEndDate" className="form-label">
-            <span className="req-field">* </span>
-              Enter Project End Date:
+              <span className="req-field">* </span>
+              Enter Project End Date(minimum date one day ahead of bidding end
+              date):
             </label>
-            <div className="row">
-              <div className="col-1">
-                {/* <label className="form-label">Date:</label> */}
-                <select
-                  name="date"
-                  id="date"
-                  className="rounded form-control text-center"
-                  onChange={handleProjDateChange}
-                >
-                  {Array.from({ length: 31 }, (_, i) => i + 1).map((num) => (
-                    <option key={num} value={num.toString().padStart(2, "0")}>
-                      {num.toString().padStart(2, "0")}
-                    </option>
-                  ))}
-                </select>
-              </div>
 
-              <div className="col-2">
-                <select
-                  name="month"
-                  id="month"
-                  className="rounded form-control text-center"
-                  onChange={handleProjDateChange}
-                >
-                  {monthNames.map((month, index) => (
-                    <option
-                      key={index}
-                      value={(index + 1).toString().padStart(2, "0")}
-                    >
-                      {month}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="col-1">
-                <select
-                  name="year"
-                  id="year"
-                  className="rounded form-control text-center"
-                  onChange={handleProjDateChange}
-                >
-                  {Array.from({ length: 50 }, (_, i) => 2024 + i).map((num) => (
-                    <option key={num} value={num}>
-                      {num}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
+            <input
+              type="date"
+              name="projectEndDate"
+              id="projectEndDate"
+              pattern="yyyy-mm-dd"
+              className="rounded form-control"
+              min={minProjectEndDate}
+              value={projectEndDate}
+              onChange={(e) => setProjectEndDate(e.target.value)}
+            />
+            {formError.projectEndDate && (
+              <p className="text-danger m-0">Project End Date required</p>
+            )}
             <br />
 
             <label htmlFor="platforms" className="form-label">
-            <span className="req-field">* </span>
+              <span className="req-field">* </span>
               Enter Platforms to develop the project: <br />
               (seperate platforms with commas):
             </label>
@@ -409,10 +404,13 @@ function CreatePost() {
               placeholder="Ex: Andriod, Web, Windows"
               onChange={handleInputChange}
             />
+            {formError.platforms && (
+              <p className="text-danger m-0">Platforms required</p>
+            )}
             <br />
 
             <label htmlFor="technologies" className="form-label">
-            <span className="req-field">* </span>
+              <span className="req-field">* </span>
               Enter technologies to develop the project: <br />
               (seperate technologies with commas):
             </label>
@@ -424,6 +422,9 @@ function CreatePost() {
               placeholder="Ex: PHP, MERN, etc"
               onChange={handleInputChange}
             />
+            {formError.technologies && (
+              <p className="text-danger m-0">Technologies required</p>
+            )}
             <br />
 
             <div>
