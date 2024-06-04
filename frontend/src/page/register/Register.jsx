@@ -9,6 +9,8 @@ import { toast } from 'react-toastify';
 
 function Register() {
   const navigate = useNavigate();
+
+  // // Store form data
   const [formData, setFormData] = useState({
     username: "",
     firstName: "",
@@ -18,8 +20,10 @@ function Register() {
     dateOfBirth: null,
   });
 
+  // Store data of birth data
   const [dobData, setdobData] = useState(new Date());
 
+  // Data to store if there are any errors in the form
   const [formError, setformError] = useState({
     firstName: false,
     username: false,
@@ -29,12 +33,15 @@ function Register() {
     cpass: false,
   });
 
+  // Data to store Alert message
   const [alrt, setAlrt] = useState(null);
 
+  // If the user inputs or changes the date of birth value in the form
   const handleDateChange = (e) => {
     setdobData(e.target.value)
   };
 
+  // If the user inputs or changes the data in the form for form submission
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     if (name.includes("[")) {
@@ -46,7 +53,6 @@ function Register() {
     } else {
       setFormData((prevState) => ({ ...prevState, [name]: value }));
     }
-    console.log(formData.dateOfBirth)
   };
 
 
@@ -56,16 +62,10 @@ function Register() {
     }, 4000);
   };
 
+  // Form submission code
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log({
-      username: formData.username,
-      firstName: formData.firstName,
-      email: formData.email,
-      password: formData.password,
-      dateOfBirth:dobData,
-      confirmPass: formData.confirmPassword,
-    });
+
 
     // Check if passwords match
     if (formData.password === formData.confirmPassword) {
@@ -123,12 +123,7 @@ function Register() {
           }
         })
         .catch((errorObject) => {
-          // console.log(`Some error occured:`);
           let obj = errorObject.response.data;
-          // console.log(obj);
-
-          console.log(JSON.stringify(obj, null, 2));
-          // console.log(formData);
           setformError((prevFormError) => ({
             ...prevFormError,
             username: false,
@@ -155,7 +150,6 @@ function Register() {
           }));
 
           obj.errors.forEach((error) => {
-            // console.log(error.path);
 
             if (error.path == "username") {
               if (error.message == "duplicate") {
@@ -205,12 +199,12 @@ function Register() {
 
   return (
     <>
+    {/* Navbar */}
       <nav className="navbar bg-dark bg-body-tertiary p-3" data-bs-theme="dark">
         <div className="navbar-brand ms-sm-3 ms-1">
           <img
             src={reactLogo}
             alt="Bootstrap"
-            // width="40"
             height="40"
           />
           <a href="/" className="text-reset text-decoration-none mx-2">
@@ -224,8 +218,10 @@ function Register() {
         </div>
       </nav>
 
+      {/* Alert message for form error */}
       {alrt && <Alert alert={alrt} />}
 
+      {/* Form Code */}
       <div className="bx-grow container d-flex flex-column align-items-center justify-content-center">
         <h1>Register</h1>
         <div className="container">
@@ -350,7 +346,6 @@ function Register() {
               </p>
             </div>
           </form>
-          {/* </div> */}
         </div>
       </div>
     </>

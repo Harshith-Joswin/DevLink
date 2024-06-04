@@ -1,14 +1,14 @@
 import React from "react";
-import reactLogo from "../../assets/react.svg";
 import { toast } from "react-toastify";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-// import './createPost.css'
+
 
 function CreatePost() {
   const navigate = useNavigate();
 
+  // Store form data
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -17,10 +17,13 @@ function CreatePost() {
     technologies: [],
   });
 
+
+  // Store bidding end date and project end date
   const [biddingEndDate, setBiddingEndDate] = useState("");
   const [projectEndDate, setProjectEndDate] = useState("");
   const [minProjectEndDate, setMinProjectEndDate] = useState("");
 
+  // Data to store if there are any errors in the form
   const [formError, setformError] = useState({
     title: false,
     description: false,
@@ -31,12 +34,14 @@ function CreatePost() {
     technologies: false,
   });
 
+  // Code the return tomorrows date
   const tomorrow = () => {
     const today = new Date();
     today.setDate(today.getDate() + 1);
     return today.toISOString().split("T")[0];
   };
 
+   // If the user inputs or changes the bidding date value in the form
   const handleBiddingEndDateChange = (e) => {
     const selectedDate = e.target.value;
     setBiddingEndDate(selectedDate);
@@ -48,6 +53,7 @@ function CreatePost() {
   const [uploadedFiles, setUploadedFiles] = useState([]);
   const [previewImages, setPreviewImages] = useState([]);
 
+   // If the user inputs or changes data in the form for form submission
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     if (name.includes("[")) {
@@ -61,11 +67,13 @@ function CreatePost() {
     }
   };
 
+  // If the user selects images in the form
   const handleFileEvent = (e) => {
     const chosenFiles = Array.prototype.slice.call(e.target.files);
     handleUploadFiles(chosenFiles);
   };
 
+  // If the user uploads images in the form
   const handleUploadFiles = (files) => {
     const uploaded = [...uploadedFiles];
     files.some((file) => {
@@ -86,11 +94,13 @@ function CreatePost() {
 
   const [files, setFiles] = useState([]);
 
+  // If the user selects pdf in the form
   const handleFileChange = (e) => {
     const chosenFiles = Array.prototype.slice.call(e.target.files);
     handlePDFFile(chosenFiles);
   };
 
+  // If the user selects images in the form
   const handlePDFFile = (files) => {
     const uploaded = [...uploadedFiles];
     files.some((file) => {
@@ -98,7 +108,9 @@ function CreatePost() {
     });
     setFiles(uploaded);
   };
+  
 
+  // Form submission code
   const handleSubmit = (e) => {
     e.preventDefault();
 
@@ -150,7 +162,6 @@ function CreatePost() {
           },
         })
         .then((res) => {
-          console.log("success:", res);
           toast.success("Post Uploaded Successfully", {
             position: "top-center",
             autoClose: 5000,
@@ -165,8 +176,6 @@ function CreatePost() {
         })
         .catch((e) => {
           let obj = e.response.data;
-          console.log("Failed:", e.response);
-          console.log(JSON.stringify(obj, null, 2));
         });
     } else {
       setformError((prevFormError) => ({
@@ -274,25 +283,6 @@ function CreatePost() {
 
   return (
     <>
-      {/* <nav className="navbar bg-dark bg-body-tertiary p-3" data-bs-theme="dark">
-        <div className="navbar-brand ms-sm-3 ms-1">
-          <img
-            src={reactLogo}
-            alt="Bootstrap"
-            // width="40"
-            height="40"
-          />
-          <a href="/" className="text-reset text-decoration-none mx-2">
-            DevLink
-          </a>
-        </div>
-         <div className="navbar-item">
-          <a href="/register" className="btn btn-primary p-sm-2 p-2 mx-sm-2 mx-1 ">
-            Register
-          </a>
-        </div> 
-      </nav> */}
-
       <div className="bx-grow container d-flex flex-column align-items-center justify-content-center">
         <h1>Create Post</h1>
         <div className="container">
@@ -468,21 +458,6 @@ function CreatePost() {
               onChange={handleFileChange}
               accept="application/pdf"
             />
-            {/* <input
-              type="file"
-              multiple
-              accept="application/pdf"
-              onChange={handleFileSelect}
-            />
-            <div>
-              {selectedFiles.map((file, index) => (
-                <div key={index}>
-                  <Document file={file}>
-                    <Page pageNumber={1} />
-                  </Document>
-                </div>
-              ))}
-            </div> */}
             <br />
             <br />
             <div className="container d-flex flex-column justify-content-center align-items-center">
