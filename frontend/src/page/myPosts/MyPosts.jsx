@@ -44,7 +44,10 @@ export default function MyPosts() {
                 // Fetch user profiles
                 const users1Promises = posts.map(async (post) => {
                     const userResponse = await fetch(`http://localhost:4000/api/profile/` + post.user, {
-                        method: "POST"
+                        method: "POST",
+                        headers: {
+                          "auth_token": localStorage.getItem('devlinktoken'),
+                      }
                     });
                     return await userResponse.json();
                 });
@@ -102,7 +105,7 @@ export default function MyPosts() {
               if (res.data.profilePhotoURL != "") {
                 setData((prevFormError) => ({
                   ...prevFormError,
-                  profilePhotoURL: 'http://localhost:4000/api/profile/photo/'+res.data.profilePhotoURL,
+                  profilePhotoURL: res.data.profilePhotoURL,
                 }));
               }
     
@@ -127,18 +130,29 @@ export default function MyPosts() {
       }, []);
 
     if (loading) {
-        return <div>Loading...</div>;
+        return (
+          <main id="main" style={{display:"flex", justifyContent:"center", height:"100vh", color:"gray"}}>
+                Loading..
+            </main>
+        )
     }
-
+    else if(posts.length==0){
+      return (
+        <main id="main" style={{display:"flex", justifyContent:"center", height:"100vh", color:"gray"}}>
+        <h3>You have not posted anything yet... :(</h3>
+    </main>
+      )
+    }
+    else
     return (
             <main id="main">
                 <div className="create_post" onClick={()=>{navigate("/create-post")}}>
-                    <img src={data.profilePhotoURL ? data.profilePhotoURL : defaultAvatar} alt="profile" className="profile" />
+                    <img src={data.profilePhotoURL ? 'http://localhost:4000/api/profile/photo/'+data.profilePhotoURL : defaultAvatar} alt="profile" className="profile" />
                     <div id="create_post">Post a new project...</div>
                 </div>
                 {
                     posts.map((post, index) => (
-                        <Posts key={post.id} post={post} user={data} />
+                        <Posts key={post.id} MyPosts={true} post={post} user={data} />
                     ))
                 }
             </main>

@@ -1,7 +1,7 @@
 import React from "react";
-import reactLogo from "../../assets/react.svg";
-import { toast } from "react-toastify";
 import { useState } from "react";
+import { toast } from 'react-toastify';
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 function CreatePost() {
@@ -19,6 +19,9 @@ function CreatePost() {
     "November",
     "December",
   ];
+
+  const navigate = useNavigate();
+
 
   const [formData, setFormData] = useState({
     title: "",
@@ -93,15 +96,6 @@ handleUploadFiles(chosenFiles);
 
   const [files, setFiles] = useState([]);
 
-  // const handleUpload = () => {
-  //   const formData = new FormData();
-  //   uploadedFiles.forEach((file) => {
-  //     formData.append("files", file);
-  //   });
-  // };
-
-  // const [status, setStatus] = useState("initial");
-
   const handleFileChange = (e) => {
     // setFiles(e.target.files);
     const chosenFiles = Array.prototype.slice.call(e.target.files);
@@ -133,10 +127,6 @@ handleUploadFiles(chosenFiles);
       formValue.append('platforms', formData.platforms);
     if (formData.technologies)
       formValue.append('technologies', formData.technologies);
-    // if(uploadedFiles)
-    //     formValue.append('images', [uploadedFiles]);
-    // if(files)
-    //     formValue.append('documents', [files]);
     uploadedFiles.forEach((file) => {
       formValue.append('images', file);
     });
@@ -145,20 +135,6 @@ handleUploadFiles(chosenFiles);
     });
     if (formData.budget)
       formValue.append('budget', formData.budget)
-    // console.log(files[0]);
-
-    // const form2val = {
-    //   title: formData.title,
-    //   description: formData.description,
-    //   platforms: [formData.platforms],
-    //   technologies: [formData.technologies],
-    //   budget: formData.budget,
-    //   biddingEndDate: biddingEndDate.year + "-" + biddingEndDate.month + "-" + biddingEndDate.date,
-    //   projectEndDate: projectEndDate.year + "-" + projectEndDate.month + "-" + projectEndDate.date,
-    //   images: [uploadedFiles][0],
-    //   documents: [files]
-    // };
-    // console.log(form2val)
 
     const token = localStorage.getItem("devlinktoken");
 
@@ -173,7 +149,31 @@ handleUploadFiles(chosenFiles);
         }
       )
       .then((res) => {
-        console.log("success:", res);
+        if(res.status==200){
+          toast.success('Post uploaded', {
+            position: "top-center",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "light",
+            });
+            navigate("/myposts");
+        }
+        else{
+          toast.error('Error while uploading post', {
+            position: "top-center",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "light",
+            });
+        }
       })
       .catch((e) => {
         console.log("Failed:", e.response);
@@ -182,26 +182,7 @@ handleUploadFiles(chosenFiles);
 
   return (
     <>
-      <nav className="navbar bg-dark bg-body-tertiary p-3" data-bs-theme="dark">
-        <div className="navbar-brand ms-sm-3 ms-1">
-          <img
-            src={reactLogo}
-            alt="Bootstrap"
-            // width="40"
-            height="40"
-          />
-          <a href="/" className="text-reset text-decoration-none mx-2">
-            DevLink
-          </a>
-        </div>
-        {/* <div className="navbar-item">
-          <a href="/register" className="btn btn-primary p-sm-2 p-2 mx-sm-2 mx-1 ">
-            Register
-          </a>
-        </div> */}
-      </nav>
-
-      <div className="bx-grow container d-flex flex-column align-items-center justify-content-center">
+      <div id="main" className="bx-grow container d-flex flex-column align-items-center justify-content-center">
         <h1>Create Post</h1>
         <div className="container">
           <form

@@ -73,7 +73,7 @@ const PostSchema = new Schema({
         type: Boolean,
         default: false
     },     
-    isNotifeid: {
+    isNotified: {
         type: Boolean,
         default: false
     },  

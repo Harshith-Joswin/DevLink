@@ -20,11 +20,10 @@ app.use('/api/post/', require('./routes/post'));
 app.use('/api/solution/', require('./routes/solution'));
 app.use('/api/notification/', require('./routes/notification'));
 
-
-// cron.schedule('* * * * *', () => {
-//     checkBiddingEndDate();
-//     checkProjectEndDate();
-// });
+cron.schedule('* * * * *', () => {
+    checkBiddingEndDate();
+    checkProjectEndDate();
+});
 
 app.listen(port, () => {
     console.log(`App listening at http://localhost:${port}`);

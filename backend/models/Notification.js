@@ -1,10 +1,11 @@
 const mongoose = require('mongoose')
+const User = require('./User');
 const { Schema } = mongoose;
 
 const NotificationSchema = new Schema({
     user: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "user",
+        type: Schema.Types.ObjectId,
+        ref: "User", // Reference the User model
         required: true
     },
     message: {
@@ -12,8 +13,7 @@ const NotificationSchema = new Schema({
         required: true
     },
     link: {
-        type: String,
-        required: true
+        type: String
     },
     notificationType: {
         type: String,

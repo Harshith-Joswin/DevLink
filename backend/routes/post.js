@@ -1,6 +1,6 @@
 const express = require('express');
 const { body, validationResult } = require('express-validator');
-const mongoose = require('mongoose')
+const mongoose = require('mongoose');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
@@ -586,7 +586,7 @@ async function recommendedPosts(userId, page, limit) {
 
         let similarPosts = [];
         if (page * limit > totalCount.length) {
-            skip = (page - 1) * limit - totalCount.length;
+            skip = (page -1)* limit - totalCount.length;
             limit -= followingPosts.length;
 
             if(skip>=0)
@@ -602,7 +602,8 @@ async function recommendedPosts(userId, page, limit) {
                                 ]
                             },
                             { user: { $ne: user._id } } // Exclude posts uploaded by a current user
-                            , { isHandovered: { $ne: true } }
+                            , { isHandovered: { $ne: true } },
+                            { use: { $ne: followingUsers } }
                         ]
                     }
                 },
@@ -664,7 +665,87 @@ async function recommendedPosts(userId, page, limit) {
             ]);
         }
 
-        return followingPosts.concat(similarPosts);
+        let posts = followingPosts.concat(similarPosts);
+
+        let otherPosts = [];
+
+        if(limit>posts.length){
+            skip = (page-1)*limit + posts.length;
+            otherPosts = await Post.aggregate([
+                // Match posts with at least one matching platform or technology
+                {
+                    $match: {
+                        $and: [
+                            {
+                                $nor: [
+                                    { platforms: { $in: userPlatforms } },
+                                    { technologies: { $in: userTechnologies } }
+                                ]
+                            },
+                            { user: { $ne: user._id } } // Exclude posts uploaded by a current user
+                            , { isHandovered: { $ne: true } },
+                            { use: { $ne: followingUsers } }                            
+                        ]
+                    }
+                },
+                // Project to include the total score of each post
+                {
+                    $project: {
+                        _id: 1,
+                        user: 1,
+                        createdAt: 1,
+                        title: 1,
+                        description:1,
+                        platforms: 1,
+                        technologies: 1,
+                        budget: 1,
+                        biddingEndDate: 1,
+                        imagesURL: 1,
+                        documentsURL:1,
+                        likesCount: 1,
+                        commentsCount: 1,
+                        isLiked: { $in: ["$_id", likedPosts] },
+                        totalScore: {
+                            $add: [
+                                {
+                                    $sum: {
+                                        $map: {
+                                            input: user.interestedTechnologies,
+                                            as: "tech",
+                                            in: {
+                                                $cond: [{ $in: ["$$tech.technology", "$technologies"] }, "$$tech.score", 0]
+                                            }
+                                        }
+                                    }
+                                },
+                                {
+                                    $sum: {
+                                        $map: {
+                                            input: user.interestedPlatforms,
+                                            as: "platforms",
+                                            in: {
+                                                $cond: [{ $in: ["$$platforms.platform", "$platforms"] }, "$$platforms.score", 0]
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                },
+                // Sort the posts based on totalScore in descending order
+                {
+                    $sort: { totalScore: -1 }
+                },
+                {
+                    $skip: skip
+                },
+                {
+                    $limit: limit
+                }
+            ]);
+        }
+        return posts.concat(otherPosts);
     } catch (error) {
         console.error("Error fetching similar posts:", error);
         throw error;
@@ -720,19 +801,19 @@ router.post('/', fetchUser, async (req, res) => {
         console.log("Error while sending recommended posts: ",e);
         return res.status(500).json({ message: "Internal server Error" });
     }
-})
+});
 
 
 //get posts uploaded by the user
 router.post('/myposts', fetchUser, async (req, res)=>{
     try {
-        const posts = await Post.find({ user: req.user.id }); // Note the use of `await`
+        const posts = await Post.find({ user: req.user.id });
         return res.json({ posts });
     } catch (error) {
         console.error(error.message);
         return res.status(500).json({ error: "Internal Server Error" });
     }
-})
+});
 
 
 //Bidding
@@ -845,7 +926,7 @@ router.post('/:postId/bids', async (req, res) => {
     catch (e) {
 
     }
-})
+});
 
 async function getBids(postId, page, limit) {
     try {
@@ -952,6 +1033,8 @@ async function acceptedPosts(userId, page, limit) {
                         documentsURL:1,
                         likesCount: 1,
                         commentsCount: 1,
+                        isHandovered:1,
+                        isCompleted:1,
                         isLiked: { $in: ["$_id", likedPosts] }
                     }
                 },
@@ -975,7 +1058,6 @@ router.post('/accepted', fetchUser, async (req, res) => {
     try {
         let page = parseInt(req.query.page);
         let limit = parseInt(req.query.limit);
-
         if (page < 0) {
             return res.status(400).json({ message: "invalid page number" });
         }
