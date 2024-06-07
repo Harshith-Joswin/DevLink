@@ -23,6 +23,10 @@ app.use('/api/post/', require('./routes/post'));
 app.use('/api/solution/', require('./routes/solution'));
 app.use('/api/notification/', require('./routes/notification'));
 
+cron.schedule('* * * * *', () => {
+    checkBiddingEndDate();
+    checkProjectEndDate();
+});
 
 // Listen server to the specified port
 app.listen(port, () => {

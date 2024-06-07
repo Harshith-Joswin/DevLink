@@ -64,18 +64,25 @@ router.post('/upload/:postId', fetchUser, upload.single('solution'), async (req,
         return res.status(403).json({ message: "Unauthorized user" });
     }
 
+    const sol = await Solution.findOne({post: req.params.postId});
+
+    if(sol){
+        await Solution.findByIdAndUpdate(sol._id, {sourceURL: req.file.filename});
+    }
+    else{
     Solution.create({ developer: post.developer, post: req.params.postId, sourceURL: req.file.filename })
-        .then(solution => {
-            Post.findByIdAndUpdate(req.params.postId, { solution: solution._id, isCompleted: true });
-            Notification.create({user:post.user, link:solution._id, notificationType:"PROJECT_COMPLETED_POSTER", message:`Project is completed. project: ${post.title}. You can now download the solution.`});
+        .then(async solution => {
+            await Post.findByIdAndUpdate(req.params.postId, { solution: solution._id, isCompleted: true });
+            await Notification.create({user:post.user, link:solution._id, notificationType:"PROJECT_COMPLETED_POSTER", message:`Project is completed. project: ${post.title}. You can now download the solution.`});
         });
+    }
     return res.json({ message: "Solution uploaded successfully" });
 });
 
 // Function to  download solution uploaded by the developer for a given post
 router.get('/download/:postId', fetchUser, async (req, res) => {
     const post = await Post.findById(req.params.postId);
-    const solution = Solution.findById(post.solution);
+    const solution = await Solution.findById(post.solution);
     if(!solution){
         return res.status(404).json({message: "solution not found"})
     }
@@ -86,8 +93,11 @@ router.get('/download/:postId', fetchUser, async (req, res) => {
 
     const filename = solution.sourceURL;
     const filePath = path.join(STORAGE_URL, "solutions/" +filename);
-    fs.access(filePath, fs.constants.F_OK, (err) => {
+    fs.access(filePath, fs.constants.F_OK, async (err) => {
         if (!err) {
+            const note = await Notification.findOne({link:solution._id, user:post.developer});
+            if(!note)
+            await Notification.create({user:post.developer, link:solution._id, notificationType:"SOLUTION_DOWNLOADED_DEVELOPER", message:`Solution is downloaded by the poster. project: ${post.title}.`});
             res.sendFile(filePath);
         }
         else {

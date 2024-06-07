@@ -131,14 +131,24 @@ export default function Feed() {
     }, []); // Empty dependency array means this effect will only run once, after the initial render
 
     if (loading) {
-        return 
-        (
-            <main id="main">
+        return(
+            <main id="main" style={{display:"flex", justifyContent:"center", height:"100vh", color:"gray"}}>
                 Loading..
             </main>
         );
     }
-
+    else if(posts.length==0){
+      return (
+        <main id="main" style={{display:"flex",flexDirection: "column",height:"100vh", color:"gray"}}>
+          <div className="create_post" onClick={()=>{navigate("/create-post")}}>
+                    <img src={data.profilePhotoURL ? data.profilePhotoURL : defaultAvatar} alt="profile" className="profile" />
+                    <div id="create_post">Post a new project...</div>
+                </div>
+        <h3 style={{alignSelf:"center", margin: "0 auto"}}>Nothing to show... :(</h3>
+    </main>
+      )
+    }
+    else
     return (
             <main id="main">
                 <div className="create_post" onClick={()=>{navigate("/create-post")}}>
@@ -147,7 +157,7 @@ export default function Feed() {
                 </div>
                 {
                     posts.map((post, index) => (
-                        <Posts key={post.id} post={post} user={users[index]} />
+                        <Posts key={post.id} Feed={true} post={post} user={users[index]} />
                     ))
                 }
             </main>

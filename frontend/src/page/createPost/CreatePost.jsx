@@ -1,11 +1,14 @@
 import React from "react";
-import { toast } from "react-toastify";
 import { useState } from "react";
+import { toast } from 'react-toastify';
+
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 
 function CreatePost() {
+  const navigate = useNavigate();
+
   const navigate = useNavigate();
 
   // Store form data
@@ -115,6 +118,7 @@ function CreatePost() {
     e.preventDefault();
 
     const formValue = new FormData();
+
 
     if (
       formData.title &&
@@ -283,7 +287,8 @@ function CreatePost() {
 
   return (
     <>
-      <div className="bx-grow container d-flex flex-column align-items-center justify-content-center">
+      <div id="main" className="bx-grow container d-flex flex-column align-items-center justify-content-center">
+
         <h1>Create Post</h1>
         <div className="container">
           <form

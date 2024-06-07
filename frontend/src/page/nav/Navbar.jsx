@@ -9,7 +9,7 @@ export default function Navbar() {
 
   const navigate = useNavigate();
   const logout =() =>{
-    localStorage.removeItem('devlinktoken');
+    
     toast.error('Logged out from Devlink', {
         position: "top-center",
         autoClose: 5000,
@@ -20,6 +20,7 @@ export default function Navbar() {
         progress: undefined,
         theme: "light",
         });
+    localStorage.removeItem('devlinktoken');
     navigate("/")
   }
 
@@ -44,7 +45,7 @@ export default function Navbar() {
           {/* <div className="tab" >IdeaExchange</div> */}
           <div
             className={
-              currentUrl == "http://localhost:5173/myposts"
+              currentUrl == "http://localhost:5173/myposts" || currentUrl == "http://localhost:5173/create-post"
                 ? "tab active"
                 : "tab"
             }
@@ -89,6 +90,18 @@ export default function Navbar() {
             }}
           >
             Profile
+          </div>
+          <div
+            className={
+              currentUrl == "http://localhost:5173/notifications"
+                ? "tab active"
+                : "tab"
+            }
+            onClick={() => {
+              navigate("/notifications");
+            }}
+          >
+            Notifications
           </div>
         </nav>
         <div id="logout" onClick={logout}>Logout</div>

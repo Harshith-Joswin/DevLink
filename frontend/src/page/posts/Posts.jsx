@@ -2,12 +2,14 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from 'react-router-dom';
 import defaultAvatar from '../profile/profile.jpg';
 import "../posts/post.css";
+import { useDropzone } from 'react-dropzone';
 import { toast } from 'react-toastify';
 
 
 export default function Posts(props) {
     const post = props.post;
     const user = props.user;
+    const [showUpload, setShowUpload] = useState(false);
     const navigate = useNavigate();
     const [showComment, setShowComment] = useState(false);
     const [showBid, setShowBid] = useState(false);
@@ -19,6 +21,7 @@ export default function Posts(props) {
     const [commentedUsers, setCommentedUsers] = useState();
     const [isLiked, setIsLiked] = useState(post.isLiked);
     const [currentUser, setCurrentUser] = useState(); //logged user
+    const [solution, setSolution] = useState(null);
 
     async function fetchComment() {
         try {
@@ -70,7 +73,7 @@ export default function Posts(props) {
                 })
             })
 
-            if(response.status == 200){
+            if (response.status == 200) {
                 toast.success("Commented successfully", {
                     position: "top-center",
                     autoClose: 5000,
@@ -80,7 +83,7 @@ export default function Posts(props) {
                     draggable: true,
                     progress: undefined,
                     theme: "light",
-                  });
+                });
             }
         }
         catch (e) {
@@ -103,7 +106,7 @@ export default function Posts(props) {
                 })
             });
 
-            if(response.status == 200){
+            if (response.status == 200) {
                 toast.success("Bid posted successfully", {
                     position: "top-center",
                     autoClose: 5000,
@@ -113,10 +116,10 @@ export default function Posts(props) {
                     draggable: true,
                     progress: undefined,
                     theme: "light",
-                  });
+                });
             }
 
-            if(response.status == 401){
+            if (response.status == 401) {
                 toast.error("Already bid posted, to change please delete it and re-post new bid", {
                     position: "top-center",
                     autoClose: 5000,
@@ -126,7 +129,7 @@ export default function Posts(props) {
                     draggable: true,
                     progress: undefined,
                     theme: "light",
-                  });
+                });
             }
 
             console.log(response);
@@ -238,8 +241,8 @@ export default function Posts(props) {
     }
 
 
-    async function fetchUser(){
-        try{
+    async function fetchUser() {
+        try {
             const response = await fetch(`http://localhost:4000/api/profile`, {
                 method: "POST",
                 headers: {
@@ -251,23 +254,93 @@ export default function Posts(props) {
             if (!response.ok) {
                 throw new Error('Network response was not ok ' + response.statusText);
             }
-            const user =await  response.json();
+            const user = await response.json();
             setCurrentUser(user._id);
-        } 
-        catch(e){
+        }
+        catch (e) {
 
         }
     }
 
     useEffect(() => {
         fetchUser();
-    })
+    });
+
+
+    const FileInput = () => {
+
+        const { getRootProps, getInputProps, isDragActive } = useDropzone({
+            onDrop: (acceptedFiles) => {
+                if (acceptedFiles[0].type === 'application/zip' || acceptedFiles[0].type === 'application/x-rar-compressed' || acceptedFiles[0].type === 'application/x-7z-compressed')
+                    setSolution(acceptedFiles[0]);
+            },
+        });
+
+        return (
+            <div {...getRootProps()} className="dropzone">
+                <input accept=".zip,.rar,.7z" {...getInputProps()} />
+                {
+                    isDragActive ? <p>Drop the file here ...</p> : <p>Drag and drop a file here, or click to select a file</p>
+                }
+                {
+                    solution && (
+                        <p>
+                            Selected file: {solution.name} ({solution.type})
+                        </p>
+                    )
+                }
+            </div>
+        );
+    };
+
+    async function handleSubmit(e) {
+        e.preventDefault();
+        const data = new FormData();
+        if (solution) {
+            data.append('solution', solution);
+        }
+
+        const response = await fetch('http://localhost:4000/api/solution/upload/'+post._id, {
+            method: "POST",
+            headers: {
+                'auth_token': localStorage.getItem('devlinktoken')
+            },
+            body: data
+        });
+
+        if (response.ok) {
+            setShowUpload(false);
+        } else {
+            console.log("Failed to update profile");
+        }
+
+    }
+
+    async function downloadSolution(){
+        const response = await fetch('http://localhost:4000/api/solution/download/'+post._id, {
+            method: "GET",
+            headers: {
+                'auth_token': localStorage.getItem('devlinktoken')
+            }
+        });
+        if (response.ok) {
+            const blob = await response.blob();
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'solution_' + post._id + '.zip'; // adjust the filename as needed
+            a.click();
+            URL.revokeObjectURL(url);
+          } else {
+            console.error('Error downloading file:', response.status, response.statusText);
+          }
+    }
 
     return (
         <>
             <div className="post" id="post_">
                 <div className="post_meta">
-                    <img src={(user.profilePhotoURL)? 'http://localhost:4000/api/profile/photo/' + user.profilePhotoURL : defaultAvatar} alt="" className="profile" onClick={(e) => { navigate("/profile/" + user.id); }} />
+                    <img src={(user.profilePhotoURL) ? 'http://localhost:4000/api/profile/photo/' + user.profilePhotoURL : defaultAvatar} alt="" className="profile" onClick={(e) => { navigate("/profile/" + user.id); }} />
                     <div className="name">
                         <span><b>{user.firstName + " " + user.lastName}</b></span>
                         <span>{user.username}</span>
@@ -345,6 +418,18 @@ export default function Posts(props) {
                             {/* comment */}
                             <b>₹</b>
                         </button>
+                        {props.AcceptedProjects && <button className='btn btn-danger m-1' onClick={() => { setShowUpload(true); }}>
+                            {/* submit solution */}
+                            Submit solution
+                        </button>
+                        }
+                        {
+                            props.MyPosts && post.isCompleted && <div key={post._id + 'doc'} className='btn btn-success m-1'
+                            // href={'http://localhost:4000//api/solution/download/' + post._id}
+                            onClick={downloadSolution}
+                            //download={`solution_${post._id}.${solution.name.split('.').pop()}`}
+                          >Download solution</div>
+                        }
 
                     </div>
 
@@ -368,19 +453,19 @@ export default function Posts(props) {
                             <div className="comment-section1" style={{ borderBottom: "1px solid #00000029" }}>
                                 {comments.map((comment, index) => {
                                     return (
-                                        <p className="comm" key={comment._id + 'comments' + index} style={{display:'flex', justifyContent:'space-between'}}>
+                                        <p className="comm" key={comment._id + 'comments' + index} style={{ display: 'flex', justifyContent: 'space-between' }}>
                                             <div>
-                                            <img style={{width:'50px', height:'50px', marginRight:'20px'}} src={comment.user.profilePhotoURL ? 'http://localhost:4000/api/profile/photo/' + comment.user.profilePhotoURL : defaultAvatar} alt="" className="profile" onClick={(e) => { navigate("/profile/" + comment.user._id); }} />
-                                            <span className="commenter1" style={{ fontWeight: "bolder" }}>
-                                                {comment.user.username}{" "}
-                                            </span>
-                                            <span className="commentText1">{comment.content}</span>
+                                                <img style={{ width: '50px', height: '50px', marginRight: '20px' }} src={comment.user.profilePhotoURL ? 'http://localhost:4000/api/profile/photo/' + comment.user.profilePhotoURL : defaultAvatar} alt="" className="profile" onClick={(e) => { navigate("/profile/" + comment.user._id); }} />
+                                                <span className="commenter1" style={{ fontWeight: "bolder" }}>
+                                                    {comment.user.username}{" "}
+                                                </span>
+                                                <span className="commentText1">{comment.content}</span>
                                             </div>
-                                            
+
                                             {
-                                            (comment.user._id==currentUser) &&
-                                            (<span style={{marginRight:'50px', color:'red'}} onClick={ ()=> {deleteComment(comment._id)}}>X</span>)
-                                        }
+                                                (comment.user._id == currentUser) &&
+                                                (<span style={{ marginRight: '50px', color: 'red' }} onClick={() => { deleteComment(comment._id) }}>X</span>)
+                                            }
                                         </p>
                                     );
                                 })}
@@ -431,19 +516,19 @@ export default function Posts(props) {
                             <div className="comment-section1" style={{ borderBottom: "1px solid #00000029" }}>
                                 {bids.map((comment, index) => {
                                     return (
-                                        <p className="comm" key={comment._id + 'comments' + index} style={{display:'flex', justifyContent:'space-between'}}>
+                                        <p className="comm" key={comment._id + 'comments' + index} style={{ display: 'flex', justifyContent: 'space-between' }}>
                                             <div>
-                                            <img style={{width:'50px', height:'50px', marginRight:'20px'}} src={comment.user.profilePhotoURL ? 'http://localhost:4000/api/profile/photo/' + comment.user.profilePhotoURL : defaultAvatar} alt="" className="profile" onClick={(e) => { navigate("/profile/" + comment.user._id); }} />
-                                            <span className="commenter1" style={{ fontWeight: "bolder" }}>
-                                                {comment.user.username}{" "}
-                                            </span>
-                                            <span className="commentText1">{' ₹'+comment.amount}</span>
+                                                <img style={{ width: '50px', height: '50px', marginRight: '20px' }} src={comment.user.profilePhotoURL ? 'http://localhost:4000/api/profile/photo/' + comment.user.profilePhotoURL : defaultAvatar} alt="" className="profile" onClick={(e) => { navigate("/profile/" + comment.user._id); }} />
+                                                <span className="commenter1" style={{ fontWeight: "bolder" }}>
+                                                    {comment.user.username}{" "}
+                                                </span>
+                                                <span className="commentText1">{' ₹' + comment.amount}</span>
                                             </div>
-                                            
+
                                             {
-                                            (comment.user._id==currentUser) &&
-                                            (<span style={{marginRight:'50px', color:'red'}} onClick={ ()=> {deleteBid(comment._id)}}>X</span>)
-                                        }
+                                                (comment.user._id == currentUser) &&
+                                                (<span style={{ marginRight: '50px', color: 'red' }} onClick={() => { deleteBid(comment._id) }}>X</span>)
+                                            }
                                         </p>
                                     );
                                 })}
@@ -481,6 +566,31 @@ export default function Posts(props) {
                     </div>
                 </div>
             )}
+
+            {showUpload && (
+                <div className="showComment1">
+                    <form onSubmit={handleSubmit} method="POST" className="container1" style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
+                        <label htmlFor="solution" className="form-label ">
+                            Upload Solution (only .zip, .rar, .7z, .gz)
+                        </label>
+                        <div name="solution" className="border border-dark p-2 rounded">
+                            <FileInput />
+                        </div>
+                        <input type="submit" value={"Upload"} />
+                    </form>
+                    <div
+                        className="close-comment1"
+                        onClick={() => {
+                            setShowUpload(false);
+                        }}
+                    >
+                        <span className="material-symbols-outlined1 material-symbols-outlined-comment1" style={{ color: 'red' }} onClick={toggleBid}>
+                            X
+                        </span>
+                    </div>
+                </div>
+            )}
+
         </>
     )
 }
