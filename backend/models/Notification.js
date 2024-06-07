@@ -1,6 +1,7 @@
 const mongoose = require('mongoose')
 const { Schema } = mongoose;
 
+// Schema for notification table
 const NotificationSchema = new Schema({
     user: {
         type: mongoose.Schema.Types.ObjectId,

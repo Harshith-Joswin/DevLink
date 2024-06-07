@@ -11,8 +11,11 @@ router.use(express.json());
 const JWT_SECRET = process.env.SECRET_KEY;
 
 
+// Contains subroutes of '/authenticate' route
 
 //accepts firstName,username,email,password,dateOfBirt and creates a new user.
+
+// signup route for registration
 router.post('/signup', [
     // Validating API inputs
     body('firstName', 'at least 3 characters required').isLength({ min: 3 }),
@@ -77,6 +80,7 @@ router.post('/signup', [
     }
 });
 
+// '/login' route for logging in the user
 router.post('/login', [
     body('username', 'at least 5 characters required').isLength({ min: 5 }),
     body('password', 'at least 4 characters required').isLength({ min: 4 }),

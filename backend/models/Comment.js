@@ -3,6 +3,7 @@ const { Schema } = mongoose;
 const User = require('./User');
 const Post = require('./Post');
 
+// Schema for comment table
 const CommentSchema = new Schema({
     user: {
         type: Schema.Types.ObjectId,

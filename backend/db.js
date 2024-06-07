@@ -1,3 +1,4 @@
+// Import and connect to mongoose
 const mongoose = require('mongoose');
 const mongoURI = process.env.DB_URL;
 const connectToMongo = () => {

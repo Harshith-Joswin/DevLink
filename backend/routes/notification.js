@@ -3,6 +3,9 @@ const Notification = require('../models/Notification');
 const express = require('express');
 const router = express.Router();
 
+// Contains subroutes for notification route
+
+// Checks for new notification
 router.post('/new', fetchUser, (req, res) => {
     const notifications = Notification.updateMany({
         $and: [
@@ -26,6 +29,7 @@ router.post('/new', fetchUser, (req, res) => {
     })
 });
 
+// Fetches all notifications
 router.post('/', fetchUser, (req, res) => {
     const notifications = Notification.find({ user: req.user.id });
     return res.json({

@@ -177,7 +177,7 @@ router.post('/update', fetchUser, upload.single('profile'),
         }
     });
 
-//fetch any user's profile photo
+//Function to fetch any user's profile photo
 router.get('/photo/:filename', (req, res) => {
     const filePath = path.join(STORAGE_URL, "/profiles/" + req.params.filename);
     fs.access(filePath, fs.constants.F_OK, (err) => {
@@ -191,7 +191,7 @@ router.get('/photo/:filename', (req, res) => {
     });
 });
 
-//Handle follow feature
+//Functioin to handle follow feature
 router.post('/:userId/follow', fetchUser, async (req, res) => {
     if (req.user.id.toString() != req.params.userId) {
         const following = await Follow.findOne({ following: req.params.userId, follower: req.user.id });
@@ -218,7 +218,7 @@ router.post('/:userId/follow', fetchUser, async (req, res) => {
 
 })
 
-//unfollow
+//Function to handle unfollow feature
 router.post('/:userId/unfollow', fetchUser, async (req, res) => {
     if (req.user.id.toString() != req.params.userId) {
         const following = await Follow.findOne({ following: req.params.userId, follower: req.user.id });
@@ -241,7 +241,7 @@ router.post('/:userId/unfollow', fetchUser, async (req, res) => {
 
 })
 
-//any user's full profile details
+//Function to fetch any user's full profile details
 router.post('/:userid', fetchUser, (req, res) => {
     User.findById(req.params.userid)
         .then(async user => {
@@ -324,8 +324,8 @@ async function getBids(postId, page, limit) {
     }
 }
 
-//fetch user's posts
 
+// Function to fetch user's post
 router.post('/posts/:userid', fetchUser, async (req, res) => {
     try {
         let page = parseInt(req.query.page);

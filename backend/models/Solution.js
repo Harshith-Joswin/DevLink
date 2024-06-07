@@ -1,6 +1,7 @@
 const mongoose = require('mongoose')
 const { Schema } = mongoose;
 
+// Schema for solution table
 const SolutionSchema = new Schema({
     developer: {
         type: mongoose.Schema.Types.ObjectId,

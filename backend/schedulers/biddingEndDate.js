@@ -3,6 +3,7 @@ const Bid = require('../models/Bid');
 const Notification = require('../models/Notification');
 const User = require('../models/User');
 
+// Function to check the bid end date and finalise the bid at the end
 checkBiddingEndDate = async () => {
     try {
         const posts = await Post.aggregate([

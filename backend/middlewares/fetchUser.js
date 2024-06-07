@@ -2,7 +2,7 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const JWT_SECRET = process.env.SECRET_KEY;
 
-
+// Function to authenticate user using JWT token
 const fetchUser = async (req, res, next) => {
     const token = req.header('auth_token');
     if (!token) {
