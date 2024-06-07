@@ -1,63 +1,62 @@
 import React from "react";
 import { useState } from "react";
 import { toast } from 'react-toastify';
+
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
+
 function CreatePost() {
-  const monthNames = [
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December",
-  ];
+  const navigate = useNavigate();
 
   const navigate = useNavigate();
 
-
+  // Store form data
   const [formData, setFormData] = useState({
     title: "",
     description: "",
     budget: 0,
-    biddingEndDate: "2024-01-01",
-    projectEndDate: "2024-01-01",
     platforms: [],
     technologies: [],
   });
 
-  const [biddingEndDate, setbiddingEndDate] = useState({
-    date: "01",
-    month: "01",
-    year: "2024",
+
+  // Store bidding end date and project end date
+  const [biddingEndDate, setBiddingEndDate] = useState("");
+  const [projectEndDate, setProjectEndDate] = useState("");
+  const [minProjectEndDate, setMinProjectEndDate] = useState("");
+
+  // Data to store if there are any errors in the form
+  const [formError, setformError] = useState({
+    title: false,
+    description: false,
+    budget: false,
+    biddingEndDate: false,
+    projectEndDate: false,
+    platforms: false,
+    technologies: false,
   });
 
-  const [projectEndDate, setprojectEndDate] = useState({
-    date: "01",
-    month: "01",
-    year: "2024",
-  });
-
-  const handleBidDateChange = (e) => {
-    const { name, value } = e.target;
-    setbiddingEndDate((prevData) => ({ ...prevData, [name]: value }));
+  // Code the return tomorrows date
+  const tomorrow = () => {
+    const today = new Date();
+    today.setDate(today.getDate() + 1);
+    return today.toISOString().split("T")[0];
   };
 
-  const handleProjDateChange = (e) => {
-    const { name, value } = e.target;
-    setprojectEndDate((prevData) => ({ ...prevData, [name]: value }));
+   // If the user inputs or changes the bidding date value in the form
+  const handleBiddingEndDateChange = (e) => {
+    const selectedDate = e.target.value;
+    setBiddingEndDate(selectedDate);
+    const minDate = new Date(selectedDate);
+    minDate.setDate(minDate.getDate() + 1);
+    setMinProjectEndDate(minDate.toISOString().split("T")[0]);
   };
 
   const [uploadedFiles, setUploadedFiles] = useState([]);
   const [previewImages, setPreviewImages] = useState([]);
 
+   // If the user inputs or changes data in the form for form submission
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     if (name.includes("[")) {
@@ -71,11 +70,13 @@ function CreatePost() {
     }
   };
 
+  // If the user selects images in the form
   const handleFileEvent = (e) => {
     const chosenFiles = Array.prototype.slice.call(e.target.files);
-handleUploadFiles(chosenFiles);
+    handleUploadFiles(chosenFiles);
   };
 
+  // If the user uploads images in the form
   const handleUploadFiles = (files) => {
     const uploaded = [...uploadedFiles];
     files.some((file) => {
@@ -96,12 +97,13 @@ handleUploadFiles(chosenFiles);
 
   const [files, setFiles] = useState([]);
 
+  // If the user selects pdf in the form
   const handleFileChange = (e) => {
-    // setFiles(e.target.files);
     const chosenFiles = Array.prototype.slice.call(e.target.files);
     handlePDFFile(chosenFiles);
   };
 
+  // If the user selects images in the form
   const handlePDFFile = (files) => {
     const uploaded = [...uploadedFiles];
     files.some((file) => {
@@ -109,48 +111,62 @@ handleUploadFiles(chosenFiles);
     });
     setFiles(uploaded);
   };
+  
 
+  // Form submission code
   const handleSubmit = (e) => {
     e.preventDefault();
 
     const formValue = new FormData();
 
-    if (formData.title)
-      formValue.append('title', formData.title);
-    if (formData.description)
-      formValue.append('description', formData.description);
-    if (formData.biddingEndDate)
-      formValue.append('biddingEndDate', biddingEndDate.year + '-' + biddingEndDate.month + '-' + biddingEndDate.date);
-    if (formData.projectEndDate)
-      formValue.append('projectEndDate', projectEndDate.year + '-' + projectEndDate.month + '-' + projectEndDate.date);
-    if (formData.platforms)
-      formValue.append('platforms', formData.platforms);
-    if (formData.technologies)
-      formValue.append('technologies', formData.technologies);
-    uploadedFiles.forEach((file) => {
-      formValue.append('images', file);
-    });
-    files.forEach((file) => {
-      formValue.append('documents', file);
-    });
-    if (formData.budget)
-      formValue.append('budget', formData.budget)
 
-    const token = localStorage.getItem("devlinktoken");
+    if (
+      formData.title &&
+      formData.description &&
+      biddingEndDate &&
+      projectEndDate &&
+      formData.platforms.length > 0 &&
+      formData.technologies.length > 0 &&
+      formData.budget
+    ) {
+      formValue.append("title", formData.title);
+      formValue.append("description", formData.description);
+      formValue.append("biddingEndDate", biddingEndDate);
+      formValue.append("projectEndDate", projectEndDate);
 
-    axios
-      .post(
-        "http://localhost:4000/api/post/create",
-        formValue,
-        {
+      let platString = formData.platforms;
+      let platSubString = platString.split(",");
+      let platformArray = platSubString.map((substring) => substring.trim());
+      platformArray.forEach((element) => {
+        formValue.append("platforms", element);
+      });
+
+      let techString = formData.technologies;
+      let techSubStrings = techString.split(",");
+      let technologyArray = techSubStrings.map((str) => str.trim());
+      technologyArray.forEach((element) => {
+        formValue.append("technologies", element);
+      });
+
+      uploadedFiles.forEach((file) => {
+        formValue.append("images", file);
+      });
+      files.forEach((file) => {
+        formValue.append("documents", file);
+      });
+
+      formValue.append("budget", formData.budget);
+
+      const token = localStorage.getItem("devlinktoken");
+
+      axios
+        .post("http://localhost:4000/api/post/create", formValue, {
           headers: {
             auth_token: `${token}`,
           },
-        }
-      )
-      .then((res) => {
-        if(res.status==200){
-          toast.success('Post uploaded', {
+        })
+        .then((res) => {
+          toast.success("Post Uploaded Successfully", {
             position: "top-center",
             autoClose: 5000,
             hideProgressBar: false,
@@ -159,11 +175,52 @@ handleUploadFiles(chosenFiles);
             draggable: true,
             progress: undefined,
             theme: "light",
-            });
-            navigate("/myposts");
-        }
-        else{
-          toast.error('Error while uploading post', {
+          });
+          navigate("/myposts");
+        })
+        .catch((e) => {
+          let obj = e.response.data;
+        });
+    } else {
+      setformError((prevFormError) => ({
+        ...prevFormError,
+        title: false,
+      }));
+      setformError((prevFormError) => ({
+        ...prevFormError,
+        description: false,
+      }));
+      setformError((prevFormError) => ({
+        ...prevFormError,
+        biddingEndDate: false,
+      }));
+
+      setformError((prevFormError) => ({
+        ...prevFormError,
+        projectEndDate: false,
+      }));
+      setformError((prevFormError) => ({
+        ...prevFormError,
+        platforms: false,
+      }));
+      setformError((prevFormError) => ({
+        ...prevFormError,
+        technologies: false,
+      }));
+      setformError((prevFormError) => ({
+        ...prevFormError,
+        budget: false,
+      }));
+    
+
+      if(!(formData.title &&
+        formData.description &&
+        biddingEndDate &&
+        projectEndDate &&
+        formData.platforms.length > 0 &&
+        formData.technologies.length > 0 &&
+        formData.budget)){
+          toast.error("Fill out the required fields", {
             position: "top-center",
             autoClose: 5000,
             hideProgressBar: false,
@@ -172,17 +229,66 @@ handleUploadFiles(chosenFiles);
             draggable: true,
             progress: undefined,
             theme: "light",
-            });
+          });
         }
-      })
-      .catch((e) => {
-        console.log("Failed:", e.response);
-      });
+
+    
+
+    if (!formData.title || formData.title.length < 3) {
+      setformError((prevFormError) => ({
+        ...prevFormError,
+        title: true,
+      }));
+    }
+
+      if (!formData.description || formData.description.length < 5) {
+        setformError((prevFormError) => ({
+          ...prevFormError,
+          description: true,
+        }));
+      }
+
+      if (!biddingEndDate) {
+        setformError((prevFormError) => ({
+          ...prevFormError,
+          biddingEndDate: true,
+        }));
+      }
+
+      if (!projectEndDate) {
+        setformError((prevFormError) => ({
+          ...prevFormError,
+          projectEndDate: true,
+        }));
+      }
+
+      if (!formData.platforms.length > 0) {
+        setformError((prevFormError) => ({
+          ...prevFormError,
+          platforms: true,
+        }));
+      }
+
+      if (!formData.technologies.length > 0) {
+        setformError((prevFormError) => ({
+          ...prevFormError,
+          technologies: true,
+        }));
+      }
+
+      if (!formData.budget) {
+        setformError((prevFormError) => ({
+          ...prevFormError,
+          budget: true,
+        }));
+      }
+    }
   };
 
   return (
     <>
       <div id="main" className="bx-grow container d-flex flex-column align-items-center justify-content-center">
+
         <h1>Create Post</h1>
         <div className="container">
           <form
@@ -192,6 +298,7 @@ handleUploadFiles(chosenFiles);
             onSubmit={handleSubmit}
           >
             <label htmlFor="title" className="form-label">
+              <span className="req-field">* </span>
               Enter Title:
             </label>
             <input
@@ -201,9 +308,13 @@ handleUploadFiles(chosenFiles);
               className="rounded form-control"
               onChange={handleInputChange}
             />
+            {formError.title && (
+              <p className="text-danger m-0">at least 3 characters required</p>
+            )}
             <br />
 
             <label htmlFor="description" className="form-label">
+              <span className="req-field">* </span>
               Enter Description:
             </label>
             <textarea
@@ -213,10 +324,15 @@ handleUploadFiles(chosenFiles);
               rows="3"
               onChange={handleInputChange}
             ></textarea>
+
+            {formError.description && (
+              <p className="text-danger m-0">at least 5 characters required</p>
+            )}
             <br />
 
             <label htmlFor="budget" className="form-label">
-              Enter Budget(in $):
+              <span className="req-field">* </span>
+              Enter Budget(in ₹):
             </label>
             <input
               type="number"
@@ -225,119 +341,53 @@ handleUploadFiles(chosenFiles);
               onChange={handleInputChange}
               className="rounded form-control"
             />
+            {formError.budget && (
+              <p className="text-danger m-0">Budget value required</p>
+            )}
             <br />
 
             <label htmlFor="biddingEndDate" className="form-label">
-              Enter Bidding End Date:
+              <span className="req-field">* </span>
+              Enter Bidding End Date(minimum date tomorrow):
             </label>
-            <div className="row">
-              <div className="col-1">
-                {/* <label className="form-label">Date:</label> */}
-                <select
-                  name="date"
-                  id="date"
-                  className="rounded form-control text-center"
-                  onChange={handleBidDateChange}
-                >
-                  {Array.from({ length: 31 }, (_, i) => i + 1).map((num) => (
-                    <option key={num} value={num.toString().padStart(2, "0")}>
-                      {num.toString().padStart(2, "0")}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="col-2">
-                <select
-                  name="month"
-                  id="month"
-                  className="rounded form-control text-center"
-                  onChange={handleBidDateChange}
-                >
-                  {monthNames.map((month, index) => (
-                    <option
-                      key={index}
-                      value={(index + 1).toString().padStart(2, "0")}
-                    >
-                      {month}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="col-1">
-                <select
-                  name="year"
-                  id="year"
-                  className="rounded form-control text-center"
-                  onChange={handleBidDateChange}
-                >
-                  {Array.from({ length: 50 }, (_, i) => 2024 + i).map((num) => (
-                    <option key={num} value={num}>
-                      {num}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
+            <input
+              type="date"
+              name="biddingEndDate"
+              id="biddingEndDate"
+              pattern="yyyy-mm-dd"
+              className="rounded form-control"
+              min={tomorrow()}
+              value={biddingEndDate}
+              onChange={handleBiddingEndDateChange}
+            />
+            {formError.biddingEndDate && (
+              <p className="text-danger m-0">Bidding date required</p>
+            )}
             <br />
 
             <label htmlFor="projectEndDate" className="form-label">
-              Enter Project End Date:
+              <span className="req-field">* </span>
+              Enter Project End Date(minimum date one day ahead of bidding end
+              date):
             </label>
-            <div className="row">
-              <div className="col-1">
-                {/* <label className="form-label">Date:</label> */}
-                <select
-                  name="date"
-                  id="date"
-                  className="rounded form-control text-center"
-                  onChange={handleProjDateChange}
-                >
-                  {Array.from({ length: 31 }, (_, i) => i + 1).map((num) => (
-                    <option key={num} value={num.toString().padStart(2, "0")}>
-                      {num.toString().padStart(2, "0")}
-                    </option>
-                  ))}
-                </select>
-              </div>
 
-              <div className="col-2">
-                <select
-                  name="month"
-                  id="month"
-                  className="rounded form-control text-center"
-                  onChange={handleProjDateChange}
-                >
-                  {monthNames.map((month, index) => (
-                    <option
-                      key={index}
-                      value={(index + 1).toString().padStart(2, "0")}
-                    >
-                      {month}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="col-1">
-                <select
-                  name="year"
-                  id="year"
-                  className="rounded form-control text-center"
-                  onChange={handleProjDateChange}
-                >
-                  {Array.from({ length: 50 }, (_, i) => 2024 + i).map((num) => (
-                    <option key={num} value={num}>
-                      {num}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
+            <input
+              type="date"
+              name="projectEndDate"
+              id="projectEndDate"
+              pattern="yyyy-mm-dd"
+              className="rounded form-control"
+              min={minProjectEndDate}
+              value={projectEndDate}
+              onChange={(e) => setProjectEndDate(e.target.value)}
+            />
+            {formError.projectEndDate && (
+              <p className="text-danger m-0">Project End Date required</p>
+            )}
             <br />
 
             <label htmlFor="platforms" className="form-label">
+              <span className="req-field">* </span>
               Enter Platforms to develop the project: <br />
               (seperate platforms with commas):
             </label>
@@ -349,9 +399,13 @@ handleUploadFiles(chosenFiles);
               placeholder="Ex: Andriod, Web, Windows"
               onChange={handleInputChange}
             />
+            {formError.platforms && (
+              <p className="text-danger m-0">Platforms required</p>
+            )}
             <br />
 
             <label htmlFor="technologies" className="form-label">
+              <span className="req-field">* </span>
               Enter technologies to develop the project: <br />
               (seperate technologies with commas):
             </label>
@@ -363,6 +417,9 @@ handleUploadFiles(chosenFiles);
               placeholder="Ex: PHP, MERN, etc"
               onChange={handleInputChange}
             />
+            {formError.technologies && (
+              <p className="text-danger m-0">Technologies required</p>
+            )}
             <br />
 
             <div>
@@ -406,21 +463,6 @@ handleUploadFiles(chosenFiles);
               onChange={handleFileChange}
               accept="application/pdf"
             />
-            {/* <input
-              type="file"
-              multiple
-              accept="application/pdf"
-              onChange={handleFileSelect}
-            />
-            <div>
-              {selectedFiles.map((file, index) => (
-                <div key={index}>
-                  <Document file={file}>
-                    <Page pageNumber={1} />
-                  </Document>
-                </div>
-              ))}
-            </div> */}
             <br />
             <br />
             <div className="container d-flex flex-column justify-content-center align-items-center">

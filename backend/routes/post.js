@@ -15,14 +15,16 @@ const Bid = require('../models/Bid');
 
 const router = express.Router();
 
+
 const STORAGE_URL = process.env.STORAGE_URL;
 
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
         cb(null, `${STORAGE_URL}/posts/photos`);
-    },
-    filename: function (req, file, cb) {
-        cb(null, file.fieldname + '-' + Math.random() * 1e16 + Date.now() + path.extname(file.originalname));
+        },
+        filename: function (req, file, cb) {
+            cb(null, file.fieldname + '-' + Math.random() * 1e16 + Date.now() + path.extname(file.originalname));
+            
     }
 });
 
@@ -48,8 +50,9 @@ const upload = multer({
     limits: { fileSize: 10 * 1024 * 1024 }
 });
 
-//posts
-//create new post
+// Contains subroutes for '/api/profile/' route
+
+// Function to create a post
 router.post('/create', fetchUser, upload.fields([
     { name: 'images', maxCount: 10 },
     { name: 'documents', maxCount: 10 }
@@ -106,7 +109,7 @@ router.post('/create', fetchUser, upload.fields([
 
 });
 
-//fetch post details
+// Functionn to retrive the post details using postId
 router.post('/get/:postId', fetchUser, async (req, res) => {
     Post.findById(req.params.postId)
         .then(async post => {
@@ -121,7 +124,7 @@ router.post('/get/:postId', fetchUser, async (req, res) => {
         });
 });
 
-//fetch photo from post
+// To retrieve the photos of the post using filename
 router.get('/photo/:filename', (req, res) => {
     const filePath = path.join(STORAGE_URL, "posts/photos/" + req.params.filename);
     fs.access(filePath, fs.constants.F_OK, (err) => {
@@ -135,7 +138,7 @@ router.get('/photo/:filename', (req, res) => {
     });
 });
 
-//fetch document from post
+// Function to retrieve the document file using filename
 router.get('/document/:filename', (req, res) => {
     const filePath = path.join(STORAGE_URL, "posts/documents/" + req.params.filename);
     fs.access(filePath, fs.constants.F_OK, (err) => {
@@ -149,7 +152,7 @@ router.get('/document/:filename', (req, res) => {
     });
 });
 
-//update post
+// Function to update the post using postId
 router.post('/update/:postId', fetchUser, upload.fields([
     { name: 'images', maxCount: 10 },
     { name: 'documents', maxCount: 10 }
@@ -190,43 +193,6 @@ router.post('/update/:postId', fetchUser, upload.fields([
                     newData.imagesURL = req.files.images.map(file => {
                         return file.filename;
                     });
-
-                    //code for future implementation
-                    /*
-                    //delete files marked as deleted
-                    for (let i = 0; i < deletedImages.length; i++) {
-                        const filePath = path.join(STORAGE_URL, "posts/photos/" + post.imagesURL[deletedImages[i]]);
-                        fs.access(filePath, fs.constants.F_OK, (err) => {
-                            if (!err) {
-                                fs.unlink(filePath, (err) => {
-                                    if (err)
-                                        console.log("File can not be deleted", err);
-                                });
-                            }
-                        });
-                        imagesURL[deletedImages[i]] = '';
-                    }
-
-                    
-                let j;
-                imagesURL = ['', 'Hii', '', '', 'sjs', 'hss', 'shsh', '', 's'];
-                //remove empty elements
-                {
-                    for (let i = 1; i < imagesURL.length; i++) {
-                        j = i;
-                        if (imagesURL[i] != '' && imagesURL[i - 1] == '') {
-                            while (j > 0 && imagesURL[j - 1] == '')
-                                j--;
-                            imagesURL[j] = imagesURL[i];
-                            imagesURL[i] = '';
-                        }
-                    }
-                    imagesURL = imagesURL.slice(0, j);
-                }
-
-                console.log(imagesURL);
-                res.json(imagesURL) */
-
 
                 }
                 if (req.files.documents) {
@@ -312,6 +278,9 @@ router.post('/update/:postId', fetchUser, upload.fields([
 router.use(express.json());
 router.use(express.urlencoded({ extended: true }));
 
+// Contains routes for comments
+
+// Function to create comments for a given post
 router.post('/:postId/comment/create', fetchUser,
     [body('content').notEmpty().withMessage('required')], (req, res) => {
         const errors = validationResult(req);
@@ -341,6 +310,7 @@ router.post('/:postId/comment/create', fetchUser,
             });
     });
 
+    // Function to delete comments for a given post
 router.delete('/comment/:commentId', fetchUser, (req, res) => {
     Comment.findById(req.params.commentId)
         .then(comment => {
@@ -363,6 +333,7 @@ router.delete('/comment/:commentId', fetchUser, (req, res) => {
         })
 });
 
+// Function to retrieve comments
 async function getComments(postId, page, limit) {
     postId = new mongoose.Types.ObjectId(postId);
     try {
@@ -424,7 +395,7 @@ async function getComments(postId, page, limit) {
     }
 }
 
-//TODO:: create pagination feature for comments
+// Function to fetch comments from the given post
 router.post('/:postId/comment', async (req, res) => {
     try {
         const post = await Post.findById(req.params.postId);
@@ -472,7 +443,7 @@ router.post('/:postId/comment', async (req, res) => {
     }
 });
 
-//likes
+// Function to fetch like of a given post
 router.post('/:postId/like', fetchUser, async (req, res) => {
     const like = await Like.findOne({ user: req.user.id, post: req.params.postId });
     if (!like) {
@@ -752,6 +723,7 @@ async function recommendedPosts(userId, page, limit) {
     }
 }
 
+// Function to retrieve post/feed data
 router.post('/', fetchUser, async (req, res) => {
     try {
         let page = parseInt(req.query.page);
@@ -803,7 +775,7 @@ router.post('/', fetchUser, async (req, res) => {
     }
 });
 
-
+// Function to retrieve post uploaded by the user themselves
 //get posts uploaded by the user
 router.post('/myposts', fetchUser, async (req, res)=>{
     try {
@@ -817,6 +789,7 @@ router.post('/myposts', fetchUser, async (req, res)=>{
 
 
 //Bidding
+// Function to bid to a post 
 router.post('/:postId/bid/create', fetchUser, [
     body('amount').isNumeric().withMessage('must be a number'),
 ], async (req, res) => {
@@ -861,6 +834,7 @@ router.post('/:postId/bid/create', fetchUser, [
     }
 });
 
+// Function to delete a bid
 router.delete('/bid/:bidId', fetchUser, async (req, res) => {
     try {
         const bid = await Bid.findById(req.params.bidId)
@@ -887,6 +861,7 @@ router.delete('/bid/:bidId', fetchUser, async (req, res) => {
     }
 });
 
+// Function to retrieve bid
 router.post('/:postId/bids', async (req, res) => {
     try {
         let page = parseInt(req.query.page);
@@ -1054,6 +1029,7 @@ async function acceptedPosts(userId, page, limit) {
     }
 }
 
+// Function to retrieve accepted posts
 router.post('/accepted', fetchUser, async (req, res) => {
     try {
         let page = parseInt(req.query.page);
@@ -1104,7 +1080,7 @@ router.post('/accepted', fetchUser, async (req, res) => {
     }
 })
 
-//error handling
+//error handling code
 router.use((err, req, res, next) => {
     if (err instanceof multer.MulterError) {
         return res.status(400).json({ error: err.message });

@@ -1,5 +1,4 @@
 import React from "react";
-import reactLogo from "../../assets/react.svg";
 import profileImage from "./profile.jpg";
 import "./userProfile.css";
 import axios from "axios";
@@ -72,7 +71,7 @@ function UserProfile() {
     return resultStr;
   };
 
-  // const post = ()=>{
+  // Load user profile data from the backend API
   useEffect(() => {
     axios
       .post(
@@ -144,39 +143,18 @@ function UserProfile() {
 
   return (
     <>
-      {/* <nav className="navbar bg-dark bg-body-tertiary p-3" data-bs-theme="dark">
-        <div className="navbar-brand ms-sm-3 ms-1">
-          <img
-            src={reactLogo}
-            alt="Bootstrap"
-            // width="40"
-            height="40"
-          />
-          <a href="/" className="text-reset text-decoration-none mx-2">
-            DevLink
-          </a>
-        </div>
-        <div className="navbar-item">
-          <a
-            href="#"
-            className="btn btn-primary p-sm-2 p-2 mx-sm-2 mx-1 "
-            onClick={logout}
-          >
-            Logout
-        </div>
-      </nav> */}
-
+    {/* Navbar */}
       <Navbar></Navbar>
+
+      {/* User profile code */}
       <main id="main">
       <div className=" d-flex justify-content-center p-2 bg-ligth text-black main">
         <div style={{ width: "50%" }}>
-          {/* <div className="container"> */}
           <div className="row my-5">
             <div className="col-6">
               <img
                 src={data.profilePhotoURL?data.profilePhotoURL:profileImage}
                 alt="profile"
-                // width="40"
                 height="200"
                 className="profile-photo"
                 style={{ width: '200px', height: '200px', objectFit: 'cover' }}
@@ -200,12 +178,6 @@ function UserProfile() {
                 </span>
               </div>
 
-              {/* <div className="d-flex flex-row p-1 col">
-                <span className="fs-5 my-2">5 posts</span>
-                <span className="fs-5 my-2 ms-3">5 followers</span>
-                <span className="fs-5 my-2 ms-3">5 following</span>
-              </div> */}
-
               <div className="details d-flex flex-row p-1 row">
                 {data.bio && (
                   <span className="fs-5 my-1">
@@ -228,6 +200,7 @@ function UserProfile() {
                 )}
 
                 {data.skills.length>0 && (
+
                   <span className="fs-5 my-1">
                     Skills:
                     <span className="fs-6"> {data.skills} </span>
@@ -245,7 +218,6 @@ function UserProfile() {
           </div>
         </div>
       </div></main>
-      {/* </div> */}
     </>
   );
 }

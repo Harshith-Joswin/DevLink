@@ -2,6 +2,7 @@ const mongoose = require('mongoose')
 const { Schema } = mongoose;
 const User = require('./User');
 
+// Schema for Post table
 const PostSchema = new Schema({
     user: {
         type: Schema.Types.ObjectId,

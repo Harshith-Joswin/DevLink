@@ -30,15 +30,21 @@ function App() {
 
   return (
     <>
-      <ToastContainer />
+
+      <ToastContainer />  
+      {/* Routes for different pages of the website */}
+
       <Routes>
+
+        {/* If user has not logged in then allow acces for these pages */}
         <Route element={<AutoLogin />}>
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
         </Route>
-        <Route element={<PrivateRoute />}>
 
+        {/* If user has logged in then allow access for these pages */}
+        <Route element={<PrivateRoute />}>
 
           <Route path="/feed" element={<><Navbar /><Feed /></>} />
           <Route path="/profile" element={<><Navbar /><UserProfile /></>} />

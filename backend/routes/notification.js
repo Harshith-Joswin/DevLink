@@ -3,6 +3,7 @@ const Notification = require('../models/Notification');
 const express = require('express');
 const router = express.Router();
 
+
 router.post('/new', fetchUser, async (req, res) => {
     const notifications = await Notification.find({
         user: req.user.id,
@@ -10,6 +11,7 @@ router.post('/new', fetchUser, async (req, res) => {
     });
 
     Notification.updateMany({
+
         $and: [
             { user: { $eq: req.user.id } },
             { new: { $eq: true } }
@@ -41,6 +43,7 @@ router.post('/', fetchUser, async (req, res) => {
     },
         { $set: { new: false } }
     );
+
     return res.json({
         count: notifications.length,
         notifications: notifications.map(notification => {

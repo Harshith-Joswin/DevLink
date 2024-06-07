@@ -7,13 +7,17 @@ import axios from "axios";
 import { toast } from 'react-toastify';
 
 function Login() {
+  // Data to check form error
   const [dataError, setdataError] = useState(false);
+
+  // Data to store username and password in the form
   const [formData, setformData] = useState({
     username: "",
     password: "",
   })
   const navigate = useNavigate();
 
+  // Function to check input data changes in the form and set data for form submission
   const handleInputChange = (e) =>{
     const { name, value } = e.target;
     if (name.includes("[")) {
@@ -27,12 +31,9 @@ function Login() {
     }
   }
 
+  // Form Submission Code
   const handleSubmit = (e) =>{
     e.preventDefault();
-    // console.log({
-    //   username:formData.username,
-    //   password:formData.password
-    // })
     axios.post("http://localhost:4000/api/auth/login",{
       username:formData.username,
       password:formData.password
@@ -62,12 +63,12 @@ function Login() {
 
   return (
     <>
+    {/* Navbar */}
       <nav className="navbar bg-dark bg-body-tertiary p-3" data-bs-theme="dark">
         <div className="navbar-brand ms-sm-3 ms-1">
           <img
             src={reactLogo}
             alt="Bootstrap"
-            // width="40"
             height="40"
           />
           <a href="/" className="text-reset text-decoration-none mx-2">
@@ -85,6 +86,7 @@ function Login() {
       {/* Alerts */}
       {dataError && <Alert alert="Invalid user name or password."/>}
 
+      {/* Form Code */}
       <div className="bx-grow container d-flex flex-column align-items-center justify-content-center">
         <h1>Login</h1>
         <div className="container">

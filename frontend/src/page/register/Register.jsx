@@ -7,24 +7,23 @@ import { useNavigate } from "react-router-dom";
 import Alert from "../components/Alert";
 import { toast } from 'react-toastify';
 
-
 function Register() {
   const navigate = useNavigate();
+
+  // // Store form data
   const [formData, setFormData] = useState({
     username: "",
     firstName: "",
     email: "",
     password: "",
     confirmPassword: "",
-    dateOfBirth: "",
+    dateOfBirth: null,
   });
 
-  const [dobData, setdobData] = useState({
-    date: "01",
-    month: "01",
-    year: "2024",
-  });
+  // Store data of birth data
+  const [dobData, setdobData] = useState(new Date());
 
+  // Data to store if there are any errors in the form
   const [formError, setformError] = useState({
     firstName: false,
     username: false,
@@ -34,28 +33,15 @@ function Register() {
     cpass: false,
   });
 
+  // Data to store Alert message
   const [alrt, setAlrt] = useState(null);
 
-  const monthNames = [
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December",
-  ];
-
+  // If the user inputs or changes the date of birth value in the form
   const handleDateChange = (e) => {
-    const { name, value } = e.target;
-    setdobData((prevData) => ({ ...prevData, [name]: value }));
+    setdobData(e.target.value)
   };
 
+  // If the user inputs or changes the data in the form for form submission
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     if (name.includes("[")) {
@@ -69,7 +55,6 @@ function Register() {
     }
   };
 
-  const [successMessage, setSuccessMessage] = useState("");
 
   const setAlertFalse = () => {
     setTimeout(() => {
@@ -77,16 +62,10 @@ function Register() {
     }, 4000);
   };
 
+  // Form submission code
   const handleSubmit = (e) => {
     e.preventDefault();
-    // console.log({
-    //   username: formData.username,
-    //   firstName: formData.firstName,
-    //   email: formData.email,
-    //   password: formData.password,
-    //   dateOfBirth: dobData.year + "-" + dobData.month + "-" + dobData.date,
-    //   confirmPass: formData.confirmPassword,
-    // });
+
 
     // Check if passwords match
     if (formData.password === formData.confirmPassword) {
@@ -96,7 +75,7 @@ function Register() {
           firstName: formData.firstName,
           email: formData.email,
           password: formData.password,
-          dateOfBirth: dobData.year + "-" + dobData.month + "-" + dobData.date,
+          dateOfBirth: dobData,
         })
         .then((response) => {
           if (response.status === 201) {
@@ -144,12 +123,7 @@ function Register() {
           }
         })
         .catch((errorObject) => {
-          // console.log(`Some error occured:`);
           let obj = errorObject.response.data;
-          // console.log(obj);
-
-          console.log(JSON.stringify(obj, null, 2));
-          // console.log(formData);
           setformError((prevFormError) => ({
             ...prevFormError,
             username: false,
@@ -176,7 +150,6 @@ function Register() {
           }));
 
           obj.errors.forEach((error) => {
-            // console.log(error.path);
 
             if (error.path == "username") {
               if (error.message == "duplicate") {
@@ -226,12 +199,12 @@ function Register() {
 
   return (
     <>
+    {/* Navbar */}
       <nav className="navbar bg-dark bg-body-tertiary p-3" data-bs-theme="dark">
         <div className="navbar-brand ms-sm-3 ms-1">
           <img
             src={reactLogo}
             alt="Bootstrap"
-            // width="40"
             height="40"
           />
           <a href="/" className="text-reset text-decoration-none mx-2">
@@ -245,8 +218,10 @@ function Register() {
         </div>
       </nav>
 
+      {/* Alert message for form error */}
       {alrt && <Alert alert={alrt} />}
 
+      {/* Form Code */}
       <div className="bx-grow container d-flex flex-column align-items-center justify-content-center">
         <h1>Register</h1>
         <div className="container">
@@ -256,6 +231,7 @@ function Register() {
             onSubmit={handleSubmit}
           >
             <label htmlFor="email" className="form-label">
+            <span className="req-field">* </span>
               Enter Email:
             </label>
             <input
@@ -272,6 +248,7 @@ function Register() {
             <br />
 
             <label htmlFor="username" className="form-label">
+            <span className="req-field">* </span>
               Enter Username:
             </label>
             <input
@@ -290,6 +267,7 @@ function Register() {
             <br />
 
             <label htmlFor="firstname" className="form-label">
+            <span className="req-field">* </span>
               Enter Firstname:
             </label>
             <input
@@ -308,69 +286,15 @@ function Register() {
             <br />
 
             <label htmlFor="dateOfBirth" className="form-label">
+            <span className="req-field">* </span>
               Enter Date of Birth:
             </label>
-            <div className="row">
-              <div className="col-1">
-                {/* <label className="form-label">Date:</label> */}
-                <select
-                  name="date"
-                  id="date"
-                  className="rounded form-control text-center"
-                  value={dobData.date}
-                  onChange={handleDateChange}
-                >
-                  {Array.from({ length: 31 }, (_, i) => i + 1).map((num) => (
-                    <option key={num} value={num.toString().padStart(2, "0")}>
-                      {num.toString().padStart(2, "0")}
-                    </option>
-                  ))}
-                </select>
-              </div>
 
-              <div className="col-2">
-                <select
-                  name="month"
-                  id="month"
-                  className="rounded form-control text-center"
-                  value={dobData.month}
-                  onChange={handleDateChange}
-                >
-                  {monthNames.map((month, index) => (
-                    <option
-                      key={index}
-                      value={(index + 1).toString().padStart(2, "0")}
-                    >
-                      {month}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="col-1">
-                <select
-                  name="year"
-                  id="year"
-                  className="rounded form-control text-center"
-                  value={dobData.year}
-                  onChange={handleDateChange}
-                >
-                  {Array.from({ length: 104 }, (_, i) => 2024 - i).map(
-                    (num) => (
-                      <option key={num} value={num}>
-                        {num}
-                      </option>
-                    )
-                  )}
-                </select>
-              </div>
-            </div>
-            {formError.dateOfBirth && (
-              <p className="text-danger m-0">Date of Birth required</p>
-            )}
+            <input type="date" name="da" id="da" pattern="yyyy-mm-dd" className="rounded form-control" onChange={handleDateChange}/>
             <br />
 
             <label htmlFor="password" className="form-label">
+            <span className="req-field">* </span>
               Enter Password:
             </label>
             <input
@@ -394,6 +318,7 @@ function Register() {
             <br />
 
             <label htmlFor="confirmPassword" className="form-label">
+            <span className="req-field">* </span>
               Confirm Password:
             </label>
             <input
@@ -421,7 +346,6 @@ function Register() {
               </p>
             </div>
           </form>
-          {/* </div> */}
         </div>
       </div>
     </>

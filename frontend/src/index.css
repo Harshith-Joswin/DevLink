@@ -13,3 +13,7 @@
 .bx-grow{
     flex-grow: 1;
 }
+
+.req-field{
+    color:red;
+}

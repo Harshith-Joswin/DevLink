@@ -10,8 +10,11 @@ import reactLogo from "../../assets/react.svg";
 import profileImage from "./profile.jpg";
 
 function Profile() {
+  // Retrieve authentication token
   const token = localStorage.getItem("devlinktoken");
+
   const { slug } = useParams();
+
   const [posts, setPosts] = useState([]);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -27,6 +30,7 @@ function Profile() {
     isFollowing: false,
   });
 
+  // Function to load profile of a user from backend API
   async function fetchData() {
     await axios
       .post(

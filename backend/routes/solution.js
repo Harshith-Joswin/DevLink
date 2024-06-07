@@ -9,7 +9,7 @@ const fs = require('fs');
 
 const router = express.Router();
 
-
+// Contains sub routes for './routes/solution'
 
 const STORAGE_URL = process.env.STORAGE_URL;
 
@@ -35,6 +35,7 @@ const upload = multer({
     limits: { fileSize: 10000 * 1024 * 1024 }
 });
 
+// Function to upload solution for a given post
 router.post('/upload/:postId', fetchUser, upload.single('solution'), async (req, res) => {
     if (!req.file) {
         return res.status(400).json({ message: "Source file required" })
@@ -78,6 +79,7 @@ router.post('/upload/:postId', fetchUser, upload.single('solution'), async (req,
     return res.json({ message: "Solution uploaded successfully" });
 });
 
+// Function to  download solution uploaded by the developer for a given post
 router.get('/download/:postId', fetchUser, async (req, res) => {
     const post = await Post.findById(req.params.postId);
     const solution = await Solution.findById(post.solution);

@@ -5,12 +5,12 @@ import reactLogo from "../../assets/react.svg";
 function Home() {
   return (
     <>
+    {/* Navbar */}
       <nav className="navbar bg-dark bg-body-tertiary p-3" data-bs-theme="dark">
         <div className="navbar-brand ms-sm-3 ms-1" href="#">
           <img
             src={reactLogo}
             alt="Bootstrap"
-            // width="40"
             height="40"
           />
           <a href="/" className="text-reset text-decoration-none mx-2">
@@ -27,7 +27,7 @@ function Home() {
         </div>
       </nav>
 
-
+    {/* Main content to register or login to site */}
       <header className="background p-5 text-center bg-image d-flex justify-content-center align-items-center">
         <div className="mask">
           <div className="d-flex h-100">
