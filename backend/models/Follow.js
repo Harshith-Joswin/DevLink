@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const { Schema } = mongoose;
 const User = require('./User');
 
+// Schema for Follow table
 const FollowSchema = new Schema({
     follower: {
         type: Schema.Types.ObjectId,

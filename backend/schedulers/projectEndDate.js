@@ -3,6 +3,7 @@ const Bid = require('../models/Bid');
 const Notification = require('../models/Notification');
 const User = require('../models/User');
 
+// Function to check the project end date and provides notification to the developer and the client that project submission date has ended
 checkProjectEndDate = async () => {
     try {
         const posts = await Post.find({

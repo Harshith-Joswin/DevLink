@@ -3,6 +3,7 @@ const { Schema } = mongoose;
 const User = require('./User');
 const Post = require('./Post');
 
+// Schema for Like table
 const LikeSchema = new Schema({
     user: {
         type: Schema.Types.ObjectId,
