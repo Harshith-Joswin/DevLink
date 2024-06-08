@@ -376,7 +376,7 @@ export default function Posts(props) {
                                     <img src={'http://localhost:4000/api/post/photo/' + img}
                                         className="d-block w-100"
                                         alt="post photo"
-                                        style={{ width: '500px', height: '500px', objectFit: 'cover' }} />
+                                        style={{width:'100%', height: '500px', objectFit: 'cover' }} />
                                 </div>
 
                             ))}

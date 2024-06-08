@@ -5,7 +5,7 @@ import reactLogo from "../../assets/react.svg";
 function Home() {
   return (
     <>
-    {/* Navbar */}
+      {/* Navbar */}
       <nav className="navbar bg-dark bg-body-tertiary p-3" data-bs-theme="dark">
         <div className="navbar-brand ms-sm-3 ms-1" href="#">
           <img
@@ -27,17 +27,21 @@ function Home() {
         </div>
       </nav>
 
-    {/* Main content to register or login to site */}
+      {/* Main content to register or login to site */}
       <header className="background p-5 text-center bg-image d-flex justify-content-center align-items-center">
         <div className="mask">
           <div className="d-flex h-100">
             <div className="text-white container">
               <h1 className="mb-3">DevLink</h1>
-              <h4 className="mb-3">
-                Lorem ipsum dolor, sit amet consectetur adipisicing elit.
-                Repellendus et nihil alias reiciendis temporibus aspernatur
-                voluptas, in numquam perspiciatis repudiandae!
-              </h4>
+              <h4 className="mb-3" style={{fontSize:'16px', fontWeight:'lighter'}}>
+                DevLink is a cutting-edge platform engineered to revolutionize the way software
+                development projects are commissioned and executed. This platform provides a dynamic
+                space where problem posters, such as companies or individuals, can post detailed descriptions
+                of their software needs along with a predetermined cash reward for the successful completion
+                of the project. Developers, ranging from seasoned professionals to promising newcomers, can
+                bid on these projects by proposing competitive rates, with the developer offering the lowest
+                bid typically being awarded the contract.
+              </h4><br/>
               <a
                 data-mdb-ripple-init
                 className="btn btn-outline-light btn-lg mx-sm-3 mx-2"
@@ -58,7 +62,7 @@ function Home() {
           </div>
         </div>
       </header>
-      
+
     </>
   );
 }

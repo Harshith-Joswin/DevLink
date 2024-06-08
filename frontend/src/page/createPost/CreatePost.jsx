@@ -8,9 +8,6 @@ import axios from "axios";
 
 function CreatePost() {
   const navigate = useNavigate();
-
-  const navigate = useNavigate();
-
   // Store form data
   const [formData, setFormData] = useState({
     title: "",
@@ -53,6 +50,7 @@ function CreatePost() {
     setMinProjectEndDate(minDate.toISOString().split("T")[0]);
   };
 
+  const [uploadedImages, setUploadedImages] = useState([]);
   const [uploadedFiles, setUploadedFiles] = useState([]);
   const [previewImages, setPreviewImages] = useState([]);
 
@@ -78,7 +76,7 @@ function CreatePost() {
 
   // If the user uploads images in the form
   const handleUploadFiles = (files) => {
-    const uploaded = [...uploadedFiles];
+    const uploaded = [...uploadedImages];
     files.some((file) => {
       uploaded.push(file);
     });
@@ -105,7 +103,7 @@ function CreatePost() {
 
   // If the user selects images in the form
   const handlePDFFile = (files) => {
-    const uploaded = [...uploadedFiles];
+    const uploaded = [];
     files.some((file) => {
       uploaded.push(file);
     });
@@ -114,12 +112,11 @@ function CreatePost() {
   
 
   // Form submission code
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-
+  
     const formValue = new FormData();
-
-
+  
     if (
       formData.title &&
       formData.description &&
@@ -133,149 +130,137 @@ function CreatePost() {
       formValue.append("description", formData.description);
       formValue.append("biddingEndDate", biddingEndDate);
       formValue.append("projectEndDate", projectEndDate);
-
+  
       let platString = formData.platforms;
       let platSubString = platString.split(",");
       let platformArray = platSubString.map((substring) => substring.trim());
       platformArray.forEach((element) => {
         formValue.append("platforms", element);
       });
-
+  
       let techString = formData.technologies;
       let techSubStrings = techString.split(",");
       let technologyArray = techSubStrings.map((str) => str.trim());
       technologyArray.forEach((element) => {
         formValue.append("technologies", element);
       });
-
-      uploadedFiles.forEach((file) => {
-        formValue.append("images", file);
-      });
-      files.forEach((file) => {
-        formValue.append("documents", file);
+  
+      uploadedFiles.forEach((imgfile) => {
+        formValue.append("images", imgfile);
       });
 
+      files.forEach((docfile) => {
+        formValue.append("documents", docfile);
+      });
+  
       formValue.append("budget", formData.budget);
-
+  
       const token = localStorage.getItem("devlinktoken");
-
-      axios
-        .post("http://localhost:4000/api/post/create", formValue, {
+  
+      try {
+        const res = await axios.post("http://localhost:4000/api/post/create", formValue, {
           headers: {
             auth_token: `${token}`,
+            'Content-Type': 'multipart/form-data',
           },
-        })
-        .then((res) => {
-          toast.success("Post Uploaded Successfully", {
-            position: "top-center",
-            autoClose: 5000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-            progress: undefined,
-            theme: "light",
-          });
-          navigate("/myposts");
-        })
-        .catch((e) => {
-          let obj = e.response.data;
         });
+        if(res.status==200){
+        toast.success("Post Uploaded Successfully", {
+          position: "top-center",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light",
+        });
+        navigate("/myposts");
+      }
+      else{
+        toast.error("Post uploading failed!!", {
+          position: "top-center",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light",
+        });
+      }
+      } catch (e) {
+        console.error("Error response:", e.response.data);
+        toast.error("Error uploading post: " + e.response.data.message, {
+          position: "top-center",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light",
+        });
+      }
     } else {
       setformError((prevFormError) => ({
         ...prevFormError,
         title: false,
-      }));
-      setformError((prevFormError) => ({
-        ...prevFormError,
         description: false,
-      }));
-      setformError((prevFormError) => ({
-        ...prevFormError,
         biddingEndDate: false,
-      }));
-
-      setformError((prevFormError) => ({
-        ...prevFormError,
         projectEndDate: false,
-      }));
-      setformError((prevFormError) => ({
-        ...prevFormError,
         platforms: false,
-      }));
-      setformError((prevFormError) => ({
-        ...prevFormError,
         technologies: false,
-      }));
-      setformError((prevFormError) => ({
-        ...prevFormError,
         budget: false,
       }));
-    
-
-      if(!(formData.title &&
-        formData.description &&
-        biddingEndDate &&
-        projectEndDate &&
-        formData.platforms.length > 0 &&
-        formData.technologies.length > 0 &&
-        formData.budget)){
-          toast.error("Fill out the required fields", {
-            position: "top-center",
-            autoClose: 5000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-            progress: undefined,
-            theme: "light",
-          });
-        }
-
-    
-
-    if (!formData.title || formData.title.length < 3) {
-      setformError((prevFormError) => ({
-        ...prevFormError,
-        title: true,
-      }));
-    }
-
+  
+      toast.error("Fill out the required fields", {
+        position: "top-center",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+      });
+  
+      if (!formData.title || formData.title.length < 3) {
+        setformError((prevFormError) => ({
+          ...prevFormError,
+          title: true,
+        }));
+      }
       if (!formData.description || formData.description.length < 5) {
         setformError((prevFormError) => ({
           ...prevFormError,
           description: true,
         }));
       }
-
       if (!biddingEndDate) {
         setformError((prevFormError) => ({
           ...prevFormError,
           biddingEndDate: true,
         }));
       }
-
       if (!projectEndDate) {
         setformError((prevFormError) => ({
           ...prevFormError,
           projectEndDate: true,
         }));
       }
-
       if (!formData.platforms.length > 0) {
         setformError((prevFormError) => ({
           ...prevFormError,
           platforms: true,
         }));
       }
-
       if (!formData.technologies.length > 0) {
         setformError((prevFormError) => ({
           ...prevFormError,
           technologies: true,
         }));
       }
-
       if (!formData.budget) {
         setformError((prevFormError) => ({
           ...prevFormError,
@@ -284,11 +269,11 @@ function CreatePost() {
       }
     }
   };
+  
 
   return (
     <>
       <div id="main" className="bx-grow container d-flex flex-column align-items-center justify-content-center">
-
         <h1>Create Post</h1>
         <div className="container">
           <form

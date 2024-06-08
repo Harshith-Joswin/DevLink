@@ -8,10 +8,6 @@ import { useNavigate } from "react-router-dom";
 
 function ProfUpdate() {
   const navigate = useNavigate();
-  const logout =() =>{
-    localStorage.removeItem('devlinktoken');
-    navigate("/")
-  }
   
   const token = localStorage.getItem("devlinktoken");
   const [formData, setFormData] = useState({
@@ -25,7 +21,6 @@ function ProfUpdate() {
     skills: "",
     occupation: "",
     bio: "",
-    profile: "",
   });
 
   const [data, setData] = useState({
@@ -263,9 +258,7 @@ function ProfUpdate() {
       data.append('currentPassword', formData.currentPassword);
     if(formData.newPassword)
       data.append('newPassword', formData.newPassword);
-
-
-    if (formData.profile) {
+    if (formData.profile!='') {
       data.append('profile', formData.profile);
     }
 
@@ -282,7 +275,7 @@ function ProfUpdate() {
 
   if (response.ok) {
     // Handle success (e.g., navigate to another page or show a success message)
-    console.log("Profile updated successfully!");
+    navigate('/profile');
     // navigate('/some-other-page'); // Uncomment and use the correct path to navigate
   } else {
     // Handle error
@@ -356,8 +349,8 @@ function ProfUpdate() {
               </label>
               <input
                 type="text"
-                name="lastname"
-                id="lastname"
+                name="lastName"
+                id="lastName"
                 className="rounded form-control"
                 onChange={handleInputChange}
                 value={formData.lastName || ""}

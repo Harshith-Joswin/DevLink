@@ -26,7 +26,7 @@ const PostSchema = new Schema({
     description: {
         type: String,
         required: true,
-        maxlength: 100
+        maxlength: 1000
     },
     platforms: [{
         type: String,

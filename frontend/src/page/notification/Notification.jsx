@@ -60,10 +60,9 @@ export default function Notifications() {
             <main id="main">
                 {notification && notification.notifications.map(note => {
                     return (
-                        <div className={note.new ? "notification new" : "notification"}>
-                            <img className="NoteIcon" src='' />
+                        <div className={note.new ? "notification new" : "notification old"}>
                             <div className="message">{note.message}
-                                <div style={{ color: 'gray' }}>{timeAgo(note.createdAt)}</div></div>
+                                <div>{timeAgo(note.createdAt)}</div></div>
                         </div>
                     )
                 })}

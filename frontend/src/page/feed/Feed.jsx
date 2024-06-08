@@ -89,10 +89,7 @@ export default function Feed() {
     useEffect(() => {
         async function fetchData() {
             try {
-
-                
-
-                const response = await fetch("http://localhost:4000/api/post?page=1&limit=10", {
+                const response = await fetch("http://localhost:4000/api/post?page=1&limit=50", {
                     method: "POST",
                     headers: {
                         "auth_token": localStorage.getItem('devlinktoken')
@@ -140,7 +137,7 @@ export default function Feed() {
     else if(posts.length==0){
       return (
         <main id="main" style={{display:"flex",flexDirection: "column",height:"100vh", color:"gray"}}>
-          <div className="create_post" onClick={()=>{navigate("/create-post")}}>
+          <div className="create_post" onClick={()=>{navigate("/create-post")}} style={{ objectFit: 'cover' }}>
                     <img src={data.profilePhotoURL ? data.profilePhotoURL : defaultAvatar} alt="profile" className="profile" />
                     <div id="create_post">Post a new project...</div>
                 </div>
@@ -151,7 +148,7 @@ export default function Feed() {
     else
     return (
             <main id="main">
-                <div className="create_post" onClick={()=>{navigate("/create-post")}}>
+                <div className="create_post" onClick={()=>{navigate("/create-post")}} style={{ objectFit: 'cover' }}>
                     <img src={data.profilePhotoURL ? data.profilePhotoURL : defaultAvatar} alt="profile" className="profile" />
                     <div id="create_post">Post a new project...</div>
                 </div>
