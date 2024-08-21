@@ -9,8 +9,6 @@ import axios from "axios";
 function CreatePost() {
   const navigate = useNavigate();
 
-  const navigate = useNavigate();
-
   // Store form data
   const [formData, setFormData] = useState({
     title: "",
